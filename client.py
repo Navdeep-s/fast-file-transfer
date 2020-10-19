@@ -9,12 +9,12 @@ REQUEST = "o"
 RESPONSE = "r"
 PERMANENT = "p"
 TEMPORARY = "t"
-DATA_FROM_SERVER= "s"
-DATA_FROM_CLIENT = "c"
+PACKET_FROM_SERVER= "s"
+PACKET_FROM_CLIENT = "c"
 
-file_id_mappings={}
+id_to_file_to_be_wrote={}
 id_count=0
-to_send_mapping={}
+it_to_file_to_be_send={}
 
 import socket # for socket 
 import sys ,os
@@ -74,14 +74,14 @@ def sending(s):
 
 
 def id_to_file(data_id):
-	name = to_send_mapping[data_id]
+	name = it_to_file_to_be_send[data_id]
 	print("opening file",name)
 	y= open(name, "rb+")
 	return y
 
 
 def id_to_file_for_recieve(data_id):
-	name = file_id_mappings[data_id]
+	name = id_to_file_to_be_wrote[data_id]
 	if( not os.path.exists(name)):
 		y = open(name,"wb")
 		y.close()
@@ -105,20 +105,19 @@ def send_packet(data_id,starting_point,file_size):
 	client.connect(("127.0.0.1", port)) 
 
 
+	#send connection information
 	client.sendall(bytes(TEMPORARY,"utf-8"))
-
-	client.sendall(bytes(DATA_FROM_CLIENT,"utf-8"))
+	client.sendall(bytes(PACKET_FROM_CLIENT,"utf-8"))
 
 	file = id_to_file(data_id)
-
 	file.seek(starting_point)
 
-
+	#send file headers
 	client.sendall((data_id).to_bytes(4, byteorder='big'))
 	client.sendall((starting_point).to_bytes(8, byteorder='big'))
 	client.sendall((file_size).to_bytes(8, byteorder='big'))
 
-
+	#send files
 	bytes_sent = 0
 	while(bytes_sent!=file_size ):
 		sending_size = BUFFER_SIZE
@@ -138,16 +137,21 @@ def recieve_packet(client):
 	print("recieve_packet")
 
 
-	data_id = reliable_recv(client,4)
-	data_id  = int.from_bytes(data_id, byteorder='big')
+
+	#recieve file headers
+	data_id_bytes = reliable_recv(client,4)
+	starting_point_bytes = reliable_recv(client,8)
+	file_size_bytes = reliable_recv(client, 8)
+
+	#decode them
+	data_id  = int.from_bytes(data_id_bytes, byteorder='big')
 	file = id_to_file_for_recieve(data_id)
-	starting_point = reliable_recv(client,8)
-	starting_point = int.from_bytes(starting_point, byteorder='big')
+	starting_point = int.from_bytes(starting_point_bytes, byteorder='big')
 	print("stating point ",starting_point)
-	file_size = reliable_recv(client, 8)
-	file_size = int.from_bytes(file_size,byteorder='big')
+	file_size = int.from_bytes(file_size_bytes,byteorder='big')
 
 
+	#recive file
 	file.seek(starting_point)
 	bytes_recived = 0
 
@@ -194,15 +198,16 @@ def create_reciving_sockets(data_id,starting_point,file_size):
 	# connecting to the server 
 	new_client.connect(("127.0.0.1", port)) 
 
-
+	#send connection infromation
 	new_client.sendall(bytes(TEMPORARY,"utf-8"))
+	new_client.sendall(bytes(PACKET_FROM_SERVER,"utf-8"))
 
-	new_client.sendall(bytes(DATA_FROM_SERVER,"utf-8"))
-
-
+	#send iformation of the file you want to receive
 	new_client.sendall((data_id).to_bytes(4, byteorder='big'))
 	new_client.sendall((starting_point).to_bytes(8, byteorder='big'))
 	new_client.sendall((file_size).to_bytes(8, byteorder='big'))
+
+	#start reciveing the packet
 	threading.Thread(target=recieve_packet,args=(new_client,)).start()
 
 
@@ -211,7 +216,7 @@ def create_reciving_sockets(data_id,starting_point,file_size):
 def handle_request(client):
 
 
-	global file_id_mappings,id_count
+	global id_to_file_to_be_wrote,id_count
 	name_size_bytes = reliable_recv(client,4)
 	name_size= int.from_bytes(name_size_bytes, byteorder='big')
 	print("name size ",name_size)
@@ -221,7 +226,7 @@ def handle_request(client):
 		lis = name.split(".")
 		name = lis[0]+"1." + ".".join(lis[1:])
 
-	file_id_mappings[id_count] = name
+	id_to_file_to_be_wrote[id_count] = name
 	id_count= id_count+1
 
 	file_size_bytes = reliable_recv(client,8)
@@ -248,6 +253,8 @@ def handle_request(client):
 	file_size = int.from_bytes(file_size_bytes, byteorder='big')
 	data_id = id_count-1
 
+
+	#calculate the segments you want to recive with each socket and start those sockets
 	data_length = int(file_size/number_of_sockets)
 	print("file size{}\ndata_length{}".format(file_size,data_length))
 	for k in range(number_of_sockets-1):
@@ -269,19 +276,20 @@ def handle_response(client):
 	print("Entered_handle_response")
 
 
-	global to_send_mapping
+	global it_to_file_to_be_send
 	name_size_bytes = reliable_recv(client,4)
 	name_size= int.from_bytes(name_size_bytes, byteorder='big')
 
 	name_bytes = reliable_recv(client,name_size)
-	name = name_bytes.decode("utf-8")
 	file_size_bytes = reliable_recv(client,8)
 	data_id_bytes = reliable_recv(client,4)
 	socket_numbers_bytes = reliable_recv(client,4)
+	
+	name = name_bytes.decode("utf-8")
 	file_size= int.from_bytes(file_size_bytes, byteorder='big')
 	data_id = int.from_bytes(data_id_bytes, byteorder='big')
 	number_of_sockets = int.from_bytes(socket_numbers_bytes, byteorder='big')
-	to_send_mapping[data_id] = name
+	it_to_file_to_be_send[data_id] = name
 
 	threading.Thread(target=send_data,args=(number_of_sockets,data_id,file_size,)).start()
 

@@ -1,10 +1,10 @@
 import os,time
 import socket		
 import threading
+import multiprocessing
 
 
-
-BUFFER_SIZE = 1024000
+BUFFER_SIZE = 10240
 REQUEST = "o"
 RESPONSE = "r"
 PERMANENT = "p"
@@ -24,25 +24,7 @@ id_to_file_to_be_read = {}
 
 
 id_count = 0
-
-
-s = socket.socket()		 
-print( "Socket successfully created")
-s.bind((HOSTING_IP, HOSTING_PORT))		 
-print( "socket binded to %s" %(HOSTING_PORT) )
-s.listen(5)	 
-
-permanent_socket = None
-
-print ("socket is listening")
-
-	# print('Got connection from', addr) 
-
-
-	# client.send('Thank you for connecting') 
-
-
-	# client.close() 
+s=None
 
 
 def reliable_recv(client,size):
@@ -134,16 +116,15 @@ def handle_packet_recieving(client):
 	file.seek(starting_point)
 	bytes_recived = 0
 
-	while(bytes_recived<file_size):
-
-		# print(bytes_recived,file_size)
+	while(bytes_recived!=file_size):
+		print("loop")
 		data_bytes = client.recv(BUFFER_SIZE)
 		bytes_recived = bytes_recived +len(data_bytes)
 		file.write(data_bytes)
 
 
 	file.close()
-	# print("closing {}\n\n\n\n\n\n........".format(data_id))
+	print("closing {}\n\n\n\n\n\n........".format(data_id))
 
 	client.close()
 
@@ -166,7 +147,7 @@ def handle_packet_sending(client):
 	starting_point = int.from_bytes(starting_point_bytes, byteorder='big')
 	file_size = int.from_bytes(file_size_bytes,byteorder='big')
 
-	name = id_to_file_to_be_read[data_id]
+	name = "two.mkv"
 	file = open(name,"rb+")
 	file.seek(starting_point)
 
@@ -354,13 +335,40 @@ def handle_connection(client):
 
 
 
-while True: 
+def main():
+	global s
 
-	print("while loop ")
-	client, addr = s.accept()	 
-	print("accepted")
-	threading.Thread(target=typing,).start()
+	s = socket.socket()		 
+	print( "Socket successfully created")
+	s.bind((HOSTING_IP, HOSTING_PORT))		 
+	print( "socket binded to %s" %(HOSTING_PORT) )
+	s.listen(5)	 
 
-	handle_connection(client)
+	permanent_socket = None
 
-	# threading.Thread(target=handle_connection, args=(client,)).start()
+	print ("socket is listening")
+
+		# print('Got connection from', addr) 
+
+
+		# client.send('Thank you for connecting') 
+
+
+	# client.close() 
+
+
+	while True: 
+
+		print("while loop ")
+		client, addr = s.accept()	 
+		print("accepted")
+		threading.Thread(target=typing,).start()
+
+		handle_connection(client)
+
+		# threading.Thread(target=handle_connection, args=(client,)).start()
+
+
+
+if(__name__=="__main__"):
+	main()

@@ -88,58 +88,19 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         loginPanel = (LinearLayout)findViewById(R.id.loginpanel);
-//        chatPanel = (LinearLayout)findViewById(R.id.chatpanel);
-
         editTextUserName = (EditText) findViewById(R.id.username);
         editTextAddress = (EditText) findViewById(R.id.address);
         textPort = (TextView) findViewById(R.id.port);
         textPort.setText("port: " + SocketServerPORT);
         buttonConnect = (Button) findViewById(R.id.connect);
-//        buttonDisconnect = (Button) findViewById(R.id.disconnect);
-//        chatMsg = (TextView) findViewById(R.id.chatmsg);
 
         buttonSend  = findViewById(R.id.Send);
         buttonConnect.setOnClickListener(buttonConnectOnClickListener);
-//        buttonDisconnect.setOnClickListener(buttonDisconnectOnClickListener);
 
-//        editTextSay = (EditText)findViewById(R.id.say);
-//        buttonSend = (Button)findViewById(R.id.send);
-
-//        buttonSend.setOnClickListener(buttonSendOnClickListener);
-
-//        Jobs_completer jobs_completer = new Jobs_completer();
-//        jobs_completer.start();
 
     }
 
-//    View.OnClickListener buttonDisconnectOnClickListener = new View.OnClickListener() {
-//
-//        @Override
-//        public void onClick(View v) {
-//            if(fileRecieverThread==null){
-//                return;
-//            }
-////            fileRecieverThread.disconnect();
-//        }
-//
-//    };
 
-//    View.OnClickListener buttonSendOnClickListener = new View.OnClickListener() {
-//
-//        @Override
-//        public void onClick(View v) {
-//            if (editTextSay.getText().toString().equals("")) {
-//                return;
-//            }
-//
-//            if(fileRecieverThread==null){
-//                return;
-//            }
-//
-////            fileRecieverThread.sendMsg(editTextSay.getText().toString() + "\n");
-//        }
-//
-//    };
 
 
 
@@ -340,17 +301,7 @@ while (true) {
 
                 int file_name_length = file_name.length();
 
-//               //Log.d("hello1",Long.toString(file.getStatSize()));
                 file.close();
-//                //Log.d("hello1",file.getName());
-
-//                //Log.d("hello1",file.getAbsolutePath());
-
-//                //Log.d("hello1",Long.toString(file_size));
-
-//                file_size = file.length();
-//                //Log.d("hello1",sending_file_path.getPath());
-
 
                 ByteBuffer b = ByteBuffer.allocate(4);
                 b.putInt(file_name_length);
@@ -697,15 +648,6 @@ while (true) {
 
                 while (remaining_file>0) {
 
-                    //Log.d("hello",Integer.toString(file_percentage));
-                    //Log.d("hello",Integer.toString(remaining_file));
-
-
-
-//                    //Log.d("hello","still here  "+Integer.toString(remaining_file));
-
-
-//                        //Log.d("hello","kind of ");
                     int offset ;
                     if (remaining_file<buffer_size){
                         offset =  (int)remaining_file;
@@ -731,9 +673,6 @@ while (true) {
                         @Override
                         public void run() {
                             msgLog = "";
-                            //            chatMsg.setText(msg//Log);
-//                            loginPanel.setVisibility(View.GONE);
-//                            chatPanel.setVisibility(View.VISIBLE);
 
                             progressBar.setProgress(file_percentage);
 
@@ -741,7 +680,6 @@ while (true) {
 
                     });
 
-//                        //Log.d(Integer.toString(remaining_file),"myfile");
 
 
                 }
@@ -751,7 +689,6 @@ while (true) {
 
                 progressBar.setProgress(100);
 
-                //Log.d("done","main_hoo");
 
             } catch (UnknownHostException e) {
                 e.printStackTrace();
@@ -785,14 +722,6 @@ while (true) {
                     }
                 }
 
-//                if (dataOutputStream != null) {
-//                    try {
-//                        dataOutputStream.close();
-//                    } catch (IOException e) {
-//                        // TODO Auto-generated catch block
-//                        e.printStackTrace();
-//                    }
-//                }
 
                 if (dataInputStream != null) {
                     try {
@@ -803,15 +732,7 @@ while (true) {
                     }
                 }
 
-//                MainActivity.this.runOnUiThread(new Runnable() {
-//
-//                    @Override
-//                    public void run() {
-//                        loginPanel.setVisibility(View.VISIBLE);
-////                        chatPanel.setVisibility(View.GONE);
-//                    }
-//
-//                });
+
             }
 
         }
@@ -1007,25 +928,7 @@ while (true) {
                     }
 
 
-                    //Log.d("got_something",buffer.toString());
 
-
-//                    int number_of_file = ByteBuffer.wrap(buffer).getInt();
-//
-//                    //Log.d("got_something",Integer.toString(number_of_file));
-//                    for(int k =0 ; k<number_of_file ;k++){
-//
-//
-//                        //Log.d("got_something","starting reciver thread");
-//                        FileReciverThread fileRecieverThread = new FileReciverThread(dstAddress, dstPort);
-//                        fileRecieverThread.start();
-//
-//                    }
-//
-//
-//                    if(number_of_file == 0){
-//                        break;
-//                    }
                 }
 
 

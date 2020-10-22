@@ -9,7 +9,7 @@ REQUEST = "o"
 RESPONSE = "r"
 PERMANENT = "p"
 TEMPORARY = "t"
-NUMBER_OF_SOCKETS = 7
+NUMBER_OF_SOCKETS = 1
 PACKET_FROM_SERVER= "s"
 PACKET_FROM_CLIENT = "c"
 
@@ -134,6 +134,7 @@ def handle_packet_recieving(client):
 	file.seek(starting_point)
 	bytes_recived = 0
 
+	start = time.time()
 	while(bytes_recived<file_size):
 
 		# print(bytes_recived,file_size)
@@ -141,12 +142,13 @@ def handle_packet_recieving(client):
 		bytes_recived = bytes_recived +len(data_bytes)
 		file.write(data_bytes)
 
-
 	file.close()
+	end = time.time()
 	# print("closing {}\n\n\n\n\n\n........".format(data_id))
 
 	client.close()
 
+	print("time take is : ", end - start)
 	print("Exited_handle_data_recieving")
 
 def handle_packet_sending(client):
@@ -260,7 +262,7 @@ def handle_response(client):
 
 
 
-def handle_request(client,number_of_socket=4):
+def handle_request(client,number_of_socket=NUMBER_OF_SOCKETS):
 
 	print("Entered_handle_request")
 

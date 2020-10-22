@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -210,418 +211,6 @@ while (true) {
 
 
 
-    private class FileReciverThread extends Thread {
-
-        String dstAddress;
-        int dstPort;
-        int size_of_file;
-        int size_of_name;
-        String name_of_file;
-        int file_percentage =0;
-        ProgressBar progressBar ;
-        File myExternal_file ;
-        int buffer_size = 1024;
-
-
-        FileReciverThread(String address, int port) {
-            dstAddress = address;
-            dstPort = port;
-        }
-
-        @Override
-        public void run() {
-            Socket socket = null;
-            DataInputStream dataInputStream = null;
-
-            try {
-
-                //Log.d("got_something","at the start of reciver thread");
-                socket = new Socket(dstAddress, dstPort);
-                dataInputStream = new DataInputStream(socket.getInputStream());
-                DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-                Log.d("got_something","connection esatblished");
-
-                ByteBuffer b = ByteBuffer.allocate(4);
-                b.putInt(22);
-                byte[] aa = b.array();
-                dataOutputStream.write(aa);
-
-//                dataOutputStream.close();
-
-                //Log.d("got_something","just sent acknowledgement");
-
-                byte buffer1[] = new byte[4]; //reading first 4 bytes as they contain size information of the file
-                dataInputStream.readFully(buffer1);//                byte result1[] = baos1.toByteArray();
-                size_of_file  = ByteBuffer.wrap(buffer1).getInt();
-                Log.d("got_something","recived size of file" +  Integer.toString(size_of_file));
-
-                byte buffer2[] = new byte[4];
-                dataInputStream.readFully(buffer2);
-
-                size_of_name=ByteBuffer.wrap(buffer2).getInt();
-
-                byte name_buffer[] = new byte[size_of_name];
-                dataInputStream.readFully(name_buffer);
-
-                name_of_file=new String(name_buffer);
-
-                int remaining_file = size_of_file;
-
-                //Log.d("hello",name_of_file);
-                //Log.d("hello",Integer.toString(size_of_file));
-                //Log.d("hello",Integer.toString(size_of_name));
-
-
-                //Log.d("got_something","trying to open a file name "+name_of_file);
-
-                myExternal_file = new File(getExternalFilesDir(null),name_of_file);
-
-
-
-
-
-                FileOutputStream fos = new FileOutputStream(myExternal_file);
-
-//                //Log.d("hello","how aer you "+ Integer.toString(remaining_file) );
-
-
-                MainActivity.this.runOnUiThread(new Runnable() {
-
-                    @Override
-                    public void run() {
-
-                        progressBar = inflateProgressBar();
-
-
-                    }
-
-                });
-
-
-                while (remaining_file>0) {
-
-                    //Log.d("hello",Integer.toString(file_percentage));
-                    //Log.d("hello",Integer.toString(remaining_file));
-
-
-
-//                    //Log.d("hello","still here  "+Integer.toString(remaining_file));
-
-
-//                        //Log.d("hello","kind of ");
-                    int offset ;
-                    if (remaining_file<buffer_size){
-                        offset = remaining_file;
-
-                    }else{
-                        offset = buffer_size;
-                    }
-
-
-                    byte buffer[] = new byte[offset];
-                    int k =dataInputStream.read(buffer);
-
-//                    //Log.d("hello",buffer.toString());
-
-
-                    fos.write(buffer,0,k);
-                    remaining_file = remaining_file - k;
-                    file_percentage = (int) (((float)(size_of_file - remaining_file)/(float)size_of_file)*100.0);
-
-                    MainActivity.this.runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            msgLog = "";
-                            //            chatMsg.setText(msg//Log);
-//                            loginPanel.setVisibility(View.GONE);
-//                            chatPanel.setVisibility(View.VISIBLE);
-
-                            progressBar.setProgress(file_percentage);
-
-                        }
-
-                    });
-
-//                        //Log.d(Integer.toString(remaining_file),"myfile");
-
-
-                }
-
-                fos.flush();
-
-                progressBar.setProgress(100);
-                ByteBuffer b1 = ByteBuffer.allocate(4);
-                b1.putInt(1);
-                byte[] a = b.array();
-                dataOutputStream.write(a);
-                byte buffer[] = new byte[4];
-                dataInputStream.read(buffer);
-                fos.close();
-
-                //Log.d("done","main_hoo");
-
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
-                final String eString = e.toString();
-                MainActivity.this.runOnUiThread(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        Toast.makeText(MainActivity.this, eString, Toast.LENGTH_LONG).show();
-                    }
-
-                });
-            } catch (IOException e) {
-                e.printStackTrace();
-                final String eString = e.toString();
-                MainActivity.this.runOnUiThread(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        Toast.makeText(MainActivity.this, eString, Toast.LENGTH_LONG).show();
-                    }
-
-                });
-            } finally {
-                if (socket != null) {
-                    try {
-                        socket.close();
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
-
-//                if (dataOutputStream != null) {
-//                    try {
-//                        dataOutputStream.close();
-//                    } catch (IOException e) {
-//                        // TODO Auto-generated catch block
-//                        e.printStackTrace();
-//                    }
-//                }
-
-                if (dataInputStream != null) {
-                    try {
-                        dataInputStream.close();
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
-
-//                MainActivity.this.runOnUiThread(new Runnable() {
-//
-//                    @Override
-//                    public void run() {
-//                        loginPanel.setVisibility(View.VISIBLE);
-////                        chatPanel.setVisibility(View.GONE);
-//                    }
-//
-//                });
-            }
-
-        }
-
-    }
-
-
-
-
-    private class FileSenderThread extends Thread {
-
-        Uri sending_file_path;
-        String dstAddress;
-        int dstPort;
-        int buffer_size = 1024;
-        long file_size;
-        long remaining_size;
-        String file_name ;
-        ProgressBar progressBar;
-        int file_percentage;
-
-        FileSenderThread(Uri sending_file_path, String address, int port) {
-            this.sending_file_path = sending_file_path;
-            dstAddress = address;
-            dstPort = port;
-        }
-
-        @Override
-        public void run() {
-            Socket socket = null;
-            DataOutputStream dataOutputStream = null;
-
-            try {
-                socket = new Socket(dstAddress, dstPort);
-                dataOutputStream = new DataOutputStream(
-                        socket.getOutputStream());
-
-                //Log.d("hello1","hi");
-                //Log.d("hello1","hi1");
-                ParcelFileDescriptor file = getContentResolver().openFileDescriptor(sending_file_path,"r");
-                file_size=file.getStatSize();
-
-                file_name = new File(sending_file_path.getPath()).getName();
-                //Log.d("hello1",file_name);
-                int file_name_length = file_name.length();
-
-//               //Log.d("hello1",Long.toString(file.getStatSize()));
-                file.close();
-//                //Log.d("hello1",file.getName());
-
-//                //Log.d("hello1",file.getAbsolutePath());
-
-//                //Log.d("hello1",Long.toString(file_size));
-
-//                file_size = file.length();
-//                //Log.d("hello1",sending_file_path.getPath());
-
-
-                ByteBuffer b = ByteBuffer.allocate(4);
-                b.putInt(11);
-                byte[] aa = b.array();
-                dataOutputStream.write(aa);
-
-
-
-                ByteBuffer bb = ByteBuffer.allocate(8);
-                bb.putLong(file_size);
-                byte[] a = bb.array();
-//                //Log.d("hello1", a.toString());
-                //Log.d("hello1",Long.toString(file_size));
-                //Log.d("hello1",Long.toHexString(file_size));
-
-                dataOutputStream.write(a);
-
-
-                ByteBuffer b1 = ByteBuffer.allocate(4);
-                b1.putInt(file_name_length);
-                byte[] a1 = b1.array();
-                dataOutputStream.write(a1);
-
-                dataOutputStream.writeBytes(file_name);
-
-
-
-
-                FileInputStream fos = (FileInputStream)getContentResolver().openInputStream(sending_file_path);
-//                //Log.d("hello1","hi3");
-
-
-
-                remaining_size = file_size;
-
-                MainActivity.this.runOnUiThread(new Runnable() {
-
-                    @Override
-                    public void run() {
-
-                        progressBar = inflateProgressBar();
-
-
-                    }
-
-                });
-
-                while(remaining_size>0) {
-
-                    byte[] buffer = new byte[buffer_size];
-                    try {
-                        fos.read(buffer);
-
-                        dataOutputStream.write(buffer);
-                        dataOutputStream.flush();
-
-                        remaining_size = remaining_size - buffer_size;
-                        file_percentage = (int) (((float)(file_size - remaining_size)/(float)file_size)*100.0);
-
-
-                        MainActivity.this.runOnUiThread(new Runnable() {
-
-                            @Override
-                            public void run() {
-//                                msg//Log = "";
-                                //            chatMsg.setText(msg//Log);
-//                                loginPanel.setVisibility(View.GONE);
-//                                chatPanel.setVisibility(View.VISIBLE);
-
-                                progressBar.setProgress(file_percentage);
-
-                            }
-
-                        });
-
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-//                    //Log.d("hello1", buffer.toString());
-
-                }
-
-
-
-
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
-                final String eString = e.toString();
-                MainActivity.this.runOnUiThread(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        Toast.makeText(MainActivity.this, eString, Toast.LENGTH_LONG).show();
-                    }
-
-                });
-            } catch (IOException e) {
-                e.printStackTrace();
-                final String eString = e.toString();
-                MainActivity.this.runOnUiThread(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        Toast.makeText(MainActivity.this, eString, Toast.LENGTH_LONG).show();
-                    }
-
-                });
-            } finally {
-                if (socket != null) {
-                    try {
-                        socket.close();
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
-
-                if (dataOutputStream != null) {
-                    try {
-                        dataOutputStream.close();
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
-
-
-
-//                MainActivity.this.runOnUiThread(new Runnable() {
-//
-//                    @Override
-//                    public void run() {
-//                        loginPanel.setVisibility(View.VISIBLE);
-//                        chatPanel.setVisibility(View.GONE);
-//                    }
-//
-//                });
-            }
-
-        }
-
-
-    }
-
 
     ProgressBar inflateProgressBar(){
         LinearLayout place1=(LinearLayout) findViewById(R.id.place);
@@ -709,7 +298,16 @@ while (true) {
 
     }
 
+    private String displayName(Uri uri) {
 
+        Cursor mCursor =
+                getApplicationContext().getContentResolver().query(uri, null, null, null, null);
+        int indexedname = mCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+        mCursor.moveToFirst();
+        String filename = mCursor.getString(indexedname);
+        mCursor.close();
+        return filename;
+    }
 
     private class File_sender extends Thread {
 
@@ -735,8 +333,11 @@ while (true) {
                 ParcelFileDescriptor file = getContentResolver().openFileDescriptor(sending_file_path,"r");
                 file_size=file.getStatSize();
 
-                file_name = new File(sending_file_path.getPath()).getName();
+                file_name = displayName(sending_file_path);
                 //Log.d("hello1",file_name);
+
+                Log.d("file_name",file_name);
+
                 int file_name_length = file_name.length();
 
 //               //Log.d("hello1",Long.toString(file.getStatSize()));
@@ -896,10 +497,14 @@ while (true) {
 
                     byte[] buffer = new byte[buffer_size];
                     try {
+                        //reading from file
                         fis.read(buffer);
 
+
+                        //sending to tcp stream
                         dataOutputStream.write(buffer);
                         dataOutputStream.flush();
+
 
                         remaining_size = remaining_size - buffer_size;
                         file_percentage = (int) (((float)(file_size - remaining_size)/(float)file_size)*100.0);
@@ -1002,8 +607,6 @@ while (true) {
 
 
 
-        int size_of_file;
-        int size_of_name;
         String name_of_file;
         int file_percentage =0;
         ProgressBar progressBar ;
@@ -1303,6 +906,8 @@ while (true) {
                         Uri uri_id = getId_to_file_to_be_send.get(name);
                         Log.d("second_error","finally came to size calculation");
 
+
+                        //ceil
                         long data_length = file_size/number_of_sockets;
 
                         for (int k = 0;k<number_of_sockets-1;k++){

@@ -268,11 +268,9 @@ public class MainActivity extends AppCompatActivity {
 
 
                         Uri file_path = clipData.getItemAt(i).getUri();
-//                    //Log.d("hello1",sending_file_path);
 
 
 
-//                        jobs.add(file_path);
 
 
                         File_sender file_sender = new File_sender(file_path);
@@ -284,9 +282,7 @@ public class MainActivity extends AppCompatActivity {
 
                 catch (Exception e) {
                     Uri file_path = data.getData();
-//                    Log.d("hello1",sending_file_path);
 
-//                    jobs.add(file_path);
                     File_sender fileSenderThread = new File_sender(file_path);
                     fileSenderThread.start();
                     e.printStackTrace();
@@ -329,13 +325,10 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-                //Log.d("hello1","hi");
-                //Log.d("hello1","hi1");
                 ParcelFileDescriptor file = getContentResolver().openFileDescriptor(sending_file_path,"r");
                 file_size=file.getStatSize();
 
                 file_name = displayName(sending_file_path);
-                //Log.d("hello1",file_name);
 
                 Log.d("file_name",file_name);
 
@@ -352,8 +345,7 @@ public class MainActivity extends AppCompatActivity {
                 ByteBuffer bb = ByteBuffer.allocate(8);
                 bb.putLong(file_size);
                 byte[] file_size_bytes = bb.array();
-//                //Log.d("hello1", a.toString());
-                //Log.d("hello1",Long.toString(file_size));
+
                 Log.d("second_error","file_size"+file_size+" name"+file_name+" id " + id_count);
 
 
@@ -370,7 +362,6 @@ public class MainActivity extends AppCompatActivity {
 
 
                 getId_to_file_to_be_send.put(file_name,sending_file_path);
-//                //Log.d("hello1","hi3");
 
 
 
@@ -470,13 +461,10 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-                //Log.d("hello1","hi");
-                //Log.d("hello1","hi1");
 
 
 
                 FileInputStream fis = (FileInputStream)getContentResolver().openInputStream(sending_file_path);
-//                //Log.d("hello1","hi3");
 
 
 
@@ -526,7 +514,6 @@ public class MainActivity extends AppCompatActivity {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-//                    //Log.d("hello1", buffer.toString());
 
                 }
 
@@ -576,15 +563,6 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-//                MainActivity.this.runOnUiThread(new Runnable() {
-//
-//                    @Override
-//                    public void run() {
-//                        loginPanel.setVisibility(View.VISIBLE);
-//                        chatPanel.setVisibility(View.GONE);
-//                    }
-//
-//                });
             }
 
         }
@@ -630,7 +608,6 @@ public class MainActivity extends AppCompatActivity {
 
             try {
 
-                //Log.d("got_something","at the start of reciver thread");
                 socket = new Socket(dstAddress, dstPort);
                 dataInputStream = new DataInputStream(socket.getInputStream());
                 DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
@@ -692,7 +669,6 @@ public class MainActivity extends AppCompatActivity {
 
                 raf.seek(starting_point);
 
-//                //Log.d("hello","how aer you "+ Integer.toString(remaining_file) );
 
 
 
@@ -716,13 +692,11 @@ public class MainActivity extends AppCompatActivity {
                     int k =dataInputStream.read(buffer);
 
 
-//                    //Log.d("hello",buffer.toString());
 
 
                     raf.write(buffer,0,k);
                     remaining_file = remaining_file - k;
                     file_percentage = (int) (((float)(file_size - remaining_file)/(float)file_size)*100.0);
-//                    Log.d("my_error","File percentage"+file_percentage);
                     MainActivity.this.runOnUiThread(new Runnable() {
 
                         @Override
@@ -803,10 +777,8 @@ public class MainActivity extends AppCompatActivity {
     private class PermanentClient extends Thread{
         String acknowledgement=PERMANENT;
         String dstAddress;
-        ProgressBar progressBar;
         int dstPort;
 
-//        boolean goOut = false;
 
         PermanentClient(String address, int port) {
             this.dstAddress = address;
@@ -829,10 +801,7 @@ public class MainActivity extends AppCompatActivity {
                 dataOutputStream.writeBytes(acknowledgement);
 
 
-//                ByteBuffer b = ByteBuffer.allocate(4);
-//                b.putInt(33);
-//                byte[] aa = b.array();
-//                dataOutputStream.write(aa);
+
 
                 runOnUiThread(new Runnable() {
                     @Override
@@ -848,10 +817,8 @@ public class MainActivity extends AppCompatActivity {
                 jobs_completer.start();
 
 
-                //Log.d("got_something","hello there");
 
                 while (true) {
-                    //Log.d("got_something","starting to recieve");
                     byte[] buffer = new byte[1];
                     dataInputStream.read(buffer);
                     String message_type = new String(buffer);

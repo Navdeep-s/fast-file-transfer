@@ -9,7 +9,7 @@ REQUEST = "o"
 RESPONSE = "r"
 PERMANENT = "p"
 TEMPORARY = "t"
-NUMBER_OF_SOCKETS = 1
+NUMBER_OF_SOCKETS = 4
 PACKET_FROM_SERVER= "s"
 PACKET_FROM_CLIENT = "c"
 
@@ -91,7 +91,7 @@ def send_file(name,client,number_of_socket=NUMBER_OF_SOCKETS):
 def typing():
 	while(True):
 		y = int(input())
-		send_file("two.mkv",permanent_socket,y)
+		send_file("file.mp4",permanent_socket,y)
 
 
 

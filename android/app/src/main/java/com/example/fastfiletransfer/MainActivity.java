@@ -41,6 +41,7 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
@@ -58,28 +59,25 @@ public class MainActivity extends AppCompatActivity {
     static String PACKET_FROM_SERVER= "s";
     static String PACKET_FROM_CLIENT = "c";
     int id_count = 0;
-    List<Uri> jobs=new LinkedList<Uri>();
+    int file_count = 0;
+    List<Uri> jobs=new LinkedList<>();
 
     DataOutputStream permanent_input;
-    Hashtable<Integer, String> id_to_file_to_be_wrote=new Hashtable<Integer, String>();
-    Hashtable<String, Uri> getId_to_file_to_be_send=new Hashtable<String, Uri>();
+    Hashtable<Integer, String> id_to_file_to_be_wrote=new Hashtable<>();
+    Hashtable<String, Uri> getId_to_file_to_be_send=new Hashtable<>();
 
-    LinearLayout loginPanel, chatPanel;
+    LinearLayout loginPanel;
 
     EditText editTextUserName, editTextAddress;
     Button buttonConnect;
-    TextView chatMsg, textPort;
+    TextView  textPort;
 
-    EditText editTextSay;
     Button buttonSend;
-//    Button buttonDisconnect;
 
     String msgLog = "";
     String textAddress="";
     PermanentClient permanentClient = null;
-    //    FileSenderThread fileSenderThread = null;
     Intent myFileIntent;
-//    String sending_file_path;
 
 
     @Override
@@ -96,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
 
         buttonSend  = findViewById(R.id.Send);
         buttonConnect.setOnClickListener(buttonConnectOnClickListener);
-
+        intent_handling();
 
     }
 
@@ -113,25 +111,22 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void run() {
-while (true) {
-    if (!jobs.isEmpty()) {
-        Log.d("second_erorr","yaaho");
-        while (Thread.activeCount() > 12) {
-        }
-        Uri file_path = jobs.get(0);
-        jobs.remove(0);
-        File_sender file_sender = new File_sender(file_path);
-        file_sender.start();
-        try {
-            file_sender.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+                while (!jobs.isEmpty()) {
+
+                    Uri file_path = jobs.get(0);
+                    jobs.remove(0);
+                    File_sender file_sender = new File_sender(file_path);
+                    file_sender.start();
+                    try {
+                        file_sender.join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
 
 
-    }
+                }
 
-}
+
 
 
 
@@ -173,13 +168,26 @@ while (true) {
 
 
 
-    ProgressBar inflateProgressBar(){
-        LinearLayout place1=(LinearLayout) findViewById(R.id.place);
-        getLayoutInflater().inflate(R.layout.progresbar,place1);
-//        Toast.makeText(this,place1.getChildCount()+"sa",Toast.LENGTH_SHORT).show();
-        LinearLayout new_progress_bar_layout = (LinearLayout) place1.getChildAt(place1.getChildCount()-1);
+    ProgressBar inflateProgressBar(int index_y,int size){
+        LinearLayout place1=(LinearLayout) findViewById(R.id.main_container);
 
-        ProgressBar pbar=(ProgressBar) new_progress_bar_layout.getChildAt(1);
+
+        while(place1.getChildCount()<index_y){
+        getLayoutInflater().inflate(R.layout.container,place1);}
+
+
+
+        LinearLayout container =(LinearLayout)place1.getChildAt(index_y-1);
+
+        container.setWeightSum(size);
+
+
+        getLayoutInflater().inflate(R.layout.progresbar,container);
+//        Toast.makeText(this,place1.getChildCount()+"sa",Toast.LENGTH_SHORT).show();
+
+
+        ProgressBar pbar=(ProgressBar) container.getChildAt(container.getChildCount()-1);
+
         return pbar;
 
     }
@@ -206,6 +214,38 @@ while (true) {
         startActivityForResult(myFileIntent, 10);
 
     }
+
+
+
+    void intent_handling(){
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        String type = intent.getType();
+
+        if (Intent.ACTION_SEND.equals(action) && type != null) {
+            {
+                Uri single_uri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+
+                jobs.add(single_uri);
+            }
+        } else if (Intent.ACTION_SEND_MULTIPLE.equals(action) && type != null) {
+            {
+
+                ArrayList<Uri> imageUris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+
+                if (imageUris != null) {
+                    jobs.addAll(imageUris);
+                }
+
+            }
+        } else {
+
+
+            // Handle other intents, such as being started from the home screen
+        }
+    }
+
+
 
 
     @Override
@@ -360,19 +400,23 @@ while (true) {
         long starting_point;
         long file_size;
         int data_id;
+        int no_of_sockets;
 
         Uri sending_file_path;
         int buffer_size = BUFFER_SIZE;
         long remaining_size;
         ProgressBar progressBar;
         int file_percentage;
+        int file_counting;
 
-        Send_packet(Uri  uri_id, long starting_point , long file_size, int id) {
+        Send_packet(Uri  uri_id, long starting_point , long file_size, int id,int no_of_sockets, int file_counti) {
 
             this.data_id = id;
             this.sending_file_path = uri_id;
             this.starting_point = starting_point;
             this.file_size = file_size;
+            this.no_of_sockets = no_of_sockets;
+            this.file_counting  = file_counti;
 
 
         }
@@ -381,6 +425,8 @@ while (true) {
         public void run() {
             Socket socket = null;
             DataOutputStream dataOutputStream = null;
+
+
 
             try {
                 socket = new Socket(dstAddress, dstPort);
@@ -409,7 +455,17 @@ while (true) {
                 dataOutputStream.write(data_buffer_id);
                 dataOutputStream.write(starting_point_buffer);
                 dataOutputStream.write(file_size_buffer);
+                MainActivity.this.runOnUiThread(new Runnable() {
 
+                    @Override
+                    public void run() {
+
+                        progressBar = inflateProgressBar(file_counting,no_of_sockets);
+                        Log.d("sender",no_of_sockets+" "+file_counting);
+
+                    }
+
+                });
 
 
 
@@ -428,17 +484,7 @@ while (true) {
 
                 fis.skip(starting_point);
 
-                MainActivity.this.runOnUiThread(new Runnable() {
 
-                    @Override
-                    public void run() {
-
-                        progressBar = inflateProgressBar();
-
-
-                    }
-
-                });
 
                 while(remaining_size>0) {
 
@@ -555,6 +601,8 @@ while (true) {
         int data_id;
         long starting_point;
         long file_size;
+        int no_of_sockets;
+        int file_counting;
 
 
 
@@ -565,17 +613,20 @@ while (true) {
         int buffer_size = BUFFER_SIZE;
 
 
-        Recieve_packet(int id, long starting_point, long file_size) {
+        Recieve_packet(int id, long starting_point, long file_size,int no_of_sockets,int file_counti) {
             this.data_id = id;
             this.starting_point = starting_point;
             this.file_size = file_size;
-
+            this.no_of_sockets = no_of_sockets;
+            this.file_counting = file_counti;
         }
 
         @Override
         public void run() {
             Socket socket = null;
             DataInputStream dataInputStream = null;
+
+
 
             try {
 
@@ -612,6 +663,7 @@ while (true) {
 
 
 
+
                 name_of_file = id_to_file_to_be_wrote.get(data_id);
 
                 myExternal_file = new File(getExternalFilesDir(null),name_of_file);
@@ -622,6 +674,19 @@ while (true) {
                 }
 
 
+                MainActivity.this.runOnUiThread(new Runnable() {
+
+                    @Override
+                    public void run() {
+
+                        progressBar = inflateProgressBar(file_counting,no_of_sockets);
+                        Log.d("sender",no_of_sockets+" "+file_count);
+
+
+                    }
+
+                });
+
 
                 RandomAccessFile raf = new RandomAccessFile(myExternal_file,"rw");
 
@@ -630,17 +695,7 @@ while (true) {
 //                //Log.d("hello","how aer you "+ Integer.toString(remaining_file) );
 
 
-                MainActivity.this.runOnUiThread(new Runnable() {
 
-                    @Override
-                    public void run() {
-
-                        progressBar = inflateProgressBar();
-
-
-                    }
-
-                });
 
                 long remaining_file = file_size;
 
@@ -748,6 +803,7 @@ while (true) {
     private class PermanentClient extends Thread{
         String acknowledgement=PERMANENT;
         String dstAddress;
+        ProgressBar progressBar;
         int dstPort;
 
 //        boolean goOut = false;
@@ -788,6 +844,10 @@ while (true) {
                     }
                 });
 
+                Jobs_completer jobs_completer = new Jobs_completer();
+                jobs_completer.start();
+
+
                 //Log.d("got_something","hello there");
 
                 while (true) {
@@ -820,31 +880,35 @@ while (true) {
 
                         //reading number_of_sockets
                         dataInputStream.readFully(buffer1);
-                        int number_of_sockets= ByteBuffer.wrap(buffer1).getInt();
+                        final int number_of_sockets= ByteBuffer.wrap(buffer1).getInt();
 
 
                         //adding he value into hash
                         Uri uri_id = getId_to_file_to_be_send.get(name);
                         Log.d("second_error","finally came to size calculation");
-
-
                         //ceil
+
+                        file_count++;
                         long data_length = file_size/number_of_sockets;
 
                         for (int k = 0;k<number_of_sockets-1;k++){
 
 
+
                             //todo
                             long starting_point  = k*data_length;
 
-                            Send_packet packet_sender = new Send_packet(uri_id, starting_point,data_length,id);
+                            Send_packet packet_sender = new Send_packet(uri_id, starting_point,data_length,id,number_of_sockets,file_count);
                             packet_sender.start();
 
                             //start a send_packet socket thread
                         }
 
+
+
+
                         long remaining_data = file_size - data_length*(number_of_sockets-1);
-                        Send_packet packet_sender = new Send_packet(uri_id, data_length*(number_of_sockets-1),remaining_data,id);
+                        Send_packet packet_sender = new Send_packet(uri_id, data_length*(number_of_sockets-1),remaining_data,id,number_of_sockets,file_count);
                         packet_sender.start();
 
 
@@ -879,7 +943,7 @@ while (true) {
                         byte[] socket_bytes = new byte[4];
                         dataInputStream.readFully(socket_bytes);
 
-                        int number_of_sockets = ByteBuffer.wrap(socket_bytes).getInt();
+                        final int number_of_sockets = ByteBuffer.wrap(socket_bytes).getInt();
 
                         Log.d("my_error",id_count+name);
 
@@ -898,8 +962,8 @@ while (true) {
                         dataOutputStream.write(id_buffer);
                         dataOutputStream.write(socket_bytes);
 
-
                         long data_length = file_size/number_of_sockets;
+                        file_count++;
 
 
                         for (int k = 0;k<number_of_sockets-1;k++){
@@ -908,14 +972,15 @@ while (true) {
 
                             long starting_point  = k*data_length;
 
-                            Recieve_packet packet_sender = new Recieve_packet(id_count-1, starting_point,data_length);
+
+                            Recieve_packet packet_sender = new Recieve_packet(id_count-1, starting_point,data_length,number_of_sockets,file_count);
                             packet_sender.start();
 
                             //start a send_packet socket thread
                         }
 
                         long remaining_data = file_size - data_length*(number_of_sockets-1);
-                        Recieve_packet packet_sender = new Recieve_packet(id_count-1, data_length*(number_of_sockets-1),remaining_data);
+                        Recieve_packet packet_sender = new Recieve_packet(id_count-1, data_length*(number_of_sockets-1),remaining_data,number_of_sockets,file_count);
                         packet_sender.start();
 
 
@@ -1002,9 +1067,6 @@ while (true) {
     }
 
 }
-
-
-
 
 
 

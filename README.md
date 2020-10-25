@@ -8,3 +8,7 @@ steps
 
 
 Note: To change configuration again you can run configuration_selector.py file, also provide our app storage permission.
+
+Note2: Make sure tkinter is installed on your host mahcine.
+
+Note3: Just give whatever premission it requres, have faith no viruses  are  implanted !!

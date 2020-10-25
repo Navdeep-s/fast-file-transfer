@@ -1,10 +1,36 @@
 import os,time
 import socket		
 import threading
+import json
+
+
+while(True):
+
+	try:
+
+		f = open("configuration.json","r")
+		dic = json.load(f)
 
 
 
-BUFFER_SIZE = 1024000
+
+
+		BUFFER_SIZE = int(dic["buffer_size"])
+		path_of_saving_files = dic["saving_path"]
+		HOSTING_IP = dic["hosting_ip"]
+		HOSTING_PORT = 8080
+
+		f.close()
+		break
+	except Exception:
+		os.system("python configuration_selector.py")
+
+
+
+
+
+
+
 REQUEST = "o"
 RESPONSE = "r"
 PERMANENT = "p"
@@ -14,8 +40,8 @@ PACKET_FROM_SERVER= "s"
 PACKET_FROM_CLIENT = "c"
 
 
-HOSTING_IP = "192.168.43.204"
-HOSTING_PORT = 8080
+
+
 
 
 id_to_file_to_be_wrote = {}
@@ -98,7 +124,9 @@ def typing():
 
 
 def get_file_handler_to_write(data_id):
-	name = id_to_file_to_be_wrote[data_id]
+
+
+	name = os.path.join(path_of_saving_files,id_to_file_to_be_wrote[data_id])
 	if(not os.path.exists(name)):
 
 		y = open(name,"ab+")

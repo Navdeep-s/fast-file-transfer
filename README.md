@@ -1,7 +1,7 @@
 # fast-file-transfer
 steps for windos user!
 
-1. just click one sever.exe and fill the form where ip is your pc's ip
+1. download sever.exe and configuration_selector.exe on your pc ,just click one sever.exe and fill the form where ip is your pc's ip
 2. now open app from android and type ip as of filled in form and click connect
 3. send file to and fro
 4. to exit from pc type anythin on console.

@@ -37,7 +37,8 @@ while(True):
 		f.close()
 		break
 	except Exception:
-		os.system("python configuration_selector.py")
+		#change here python3 to python if on windows 
+		os.system("python3 configuration_selector.py")
 
 
 

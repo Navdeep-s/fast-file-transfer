@@ -1,5 +1,18 @@
 # fast-file-transfer
-steps 
+steps for windos user!
+
+1. just click one sever.exe and fill the form where ip is your pc's ip
+2. now open app from android and type ip as of filled in form and click connect
+3. send file to and fro
+4. to exit from pc type anythin on console.
+
+
+
+
+
+steps for typical so called "mac" and "linx"
+
+
 1. first install test.apk in your android device
 2. then run sever.py file on your pc configuration panel will appear fill it.
 3. once completed then app will start in terminal with lots of debuging information don't worry about that.

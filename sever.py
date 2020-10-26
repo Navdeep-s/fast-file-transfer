@@ -458,10 +458,13 @@ def typing():
 	os._exit(1)
 	print("exiteed")
 
+
+
+threading.Thread(target=typing,).start()
+
 while True: 
 
 	print("while loop ")
-	threading.Thread(target=typing,).start()
 
 	client, addr = s.accept()	 
 	print("accepted")

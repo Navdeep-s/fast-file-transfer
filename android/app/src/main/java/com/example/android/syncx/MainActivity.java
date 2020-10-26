@@ -1,24 +1,18 @@
-package com.example.fastfiletransfer;
-
-
-
+package com.example.android.syncx;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-
-import android.app.Activity;
 import android.content.ClipData;
-import android.content.ContentResolver;
+
+import com.example.SyncX.R;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.ParcelFileDescriptor;
-import android.os.PersistableBundle;
-import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.View;
@@ -26,31 +20,24 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-
     static final int SocketServerPORT = 8080;
     String dstAddress;
     int dstPort;
@@ -81,30 +68,19 @@ public class MainActivity extends AppCompatActivity {
     String textAddress="";
     PermanentClient permanentClient = null;
     Intent myFileIntent;
-
-
-
     SharedPreferences sharedpreferences;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
-
-
-
         setContentView(R.layout.activity_main);
 
-
-
         loginPanel = (LinearLayout)findViewById(R.id.loginpanel);
-        editTextUserName = (EditText) findViewById(R.id.username);
         editTextAddress = (EditText) findViewById(R.id.address);
         textPort = (TextView) findViewById(R.id.port);
         textPort.setText("port: " + SocketServerPORT);
         buttonConnect = (Button) findViewById(R.id.connect);
-
         sharedpreferences = getSharedPreferences("mypref",
                 Context.MODE_PRIVATE);
         if (sharedpreferences.contains("ip")) {
@@ -112,11 +88,16 @@ public class MainActivity extends AppCompatActivity {
         }
 
         buttonSend  = findViewById(R.id.Send);
+        findViewById(R.id.scanbtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(),QRCodeScanActivity.class));
+            }
+        });
         buttonConnect.setOnClickListener(buttonConnectOnClickListener);
         intent_handling();
 
     }
-
 
     @Override
     protected void onPause() {
@@ -131,38 +112,25 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
-
     private class Jobs_completer extends  Thread{
-
         Jobs_completer(){
-
         }
-
-
         @Override
         public void run() {
-                while (!jobs.isEmpty()) {
+            while (!jobs.isEmpty()) {
 
-                    Uri file_path = jobs.get(0);
-                    jobs.remove(0);
-                    File_sender file_sender = new File_sender(file_path);
-                    file_sender.start();
-                    try {
-                        file_sender.join();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-
+                Uri file_path = jobs.get(0);
+                jobs.remove(0);
+                File_sender file_sender = new File_sender(file_path);
+                file_sender.start();
+                try {
+                    file_sender.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-
-
-
-
-
+            }
         }
     }
-
     View.OnClickListener buttonConnectOnClickListener = new View.OnClickListener() {
 
         @Override
@@ -175,58 +143,30 @@ public class MainActivity extends AppCompatActivity {
                         Toast.LENGTH_LONG).show();
                 return;
             }
-
             String textAddress = editTextAddress.getText().toString();
             if (textAddress.equals("")) {
                 Toast.makeText(MainActivity.this, "Enter Addresse",
                         Toast.LENGTH_LONG).show();
                 return;
             }
-
-
-
             dstAddress = textAddress;
             dstPort = SocketServerPORT;
-
-
-
-
 
             permanentClient = new PermanentClient(textAddress, SocketServerPORT);
             permanentClient.start();
         }
 
     };
-
-
-
-
-
-    ProgressBar inflateProgressBar(int index_y,int size){
+    ProgressBar inflateProgressBar(int index_y,int size)
+    {
         LinearLayout place1=(LinearLayout) findViewById(R.id.main_container);
-
-
         while(place1.getChildCount()<index_y){
-        getLayoutInflater().inflate(R.layout.container,place1);}
-
-
-
+            getLayoutInflater().inflate(R.layout.container,place1);}
         LinearLayout container =(LinearLayout)place1.getChildAt(index_y-1);
-
         container.setWeightSum(size);
-
-
         getLayoutInflater().inflate(R.layout.progresbar,container);
-//        Toast.makeText(this,place1.getChildCount()+"sa",Toast.LENGTH_SHORT).show();
-
-
-        ProgressBar pbar=(ProgressBar) container.getChildAt(container.getChildCount()-1);
-
-        return pbar;
-
+        return (ProgressBar) container.getChildAt(container.getChildCount()-1);
     }
-
-
     public void initiate_send(View view) {
         String textUserName = editTextUserName.getText().toString();
         if (textUserName.equals("")) {
@@ -234,28 +174,22 @@ public class MainActivity extends AppCompatActivity {
                     Toast.LENGTH_LONG).show();
             return;
         }
-
         textAddress = editTextAddress.getText().toString();
         if (textAddress.equals("")) {
             Toast.makeText(MainActivity.this, "Enter Addresse",
                     Toast.LENGTH_LONG).show();
             return;
         }
-
         myFileIntent= new Intent(Intent.ACTION_GET_CONTENT);
         myFileIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE,true);
         myFileIntent.setType("*/*");
         startActivityForResult(myFileIntent, 10);
-
     }
-
-
 
     void intent_handling(){
         Intent intent = getIntent();
         String action = intent.getAction();
         String type = intent.getType();
-
         if (Intent.ACTION_SEND.equals(action) && type != null) {
             {
                 Uri single_uri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
@@ -278,61 +212,35 @@ public class MainActivity extends AppCompatActivity {
             // Handle other intents, such as being started from the home screen
         }
     }
-
-
-
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-
-
         if (requestCode==10){
 
             if(resultCode==RESULT_OK){
                 try {
-
                     ClipData clipData = data.getClipData();
                     Log.d("nubmer",Integer.toString(clipData.getItemCount()));
                     for(int i = 0 ;i<clipData.getItemCount();i++) {
-
-
-
-
-
                         Uri file_path = clipData.getItemAt(i).getUri();
-
-
-
-
-
                         File_sender file_sender = new File_sender(file_path);
                         file_sender.start();
                         file_sender.join();
-
                     }
                 }
-
                 catch (Exception e) {
                     Uri file_path = data.getData();
-
                     File_sender fileSenderThread = new File_sender(file_path);
                     fileSenderThread.start();
                     e.printStackTrace();
                 }
-
             }
-
-
         }
-
     }
-
     private String displayName(Uri uri) {
-
         Cursor mCursor =
                 getApplicationContext().getContentResolver().query(uri, null, null, null, null);
+        assert mCursor != null;
         int indexedname = mCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
         mCursor.moveToFirst();
         String filename = mCursor.getString(indexedname);
@@ -353,37 +261,22 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             DataOutputStream dataOutputStream = permanent_input;
-
-
             try {
-
-
-
                 ParcelFileDescriptor file = getContentResolver().openFileDescriptor(sending_file_path,"r");
                 file_size=file.getStatSize();
 
                 file_name = displayName(sending_file_path);
-
                 Log.d("file_name",file_name);
-
                 int file_name_length = file_name.length();
-
                 file.close();
-
                 ByteBuffer b = ByteBuffer.allocate(4);
                 b.putInt(file_name_length);
                 byte[] name_size_bytes = b.array();
-
-
-
                 ByteBuffer bb = ByteBuffer.allocate(8);
                 bb.putLong(file_size);
                 byte[] file_size_bytes = bb.array();
 
                 Log.d("second_error","file_size"+file_size+" name"+file_name+" id " + id_count);
-
-
-
                 dataOutputStream.writeBytes(REQUEST);
                 dataOutputStream.write(name_size_bytes);
                 dataOutputStream.writeBytes(file_name);
@@ -392,18 +285,7 @@ public class MainActivity extends AppCompatActivity {
                 //just junk values
                 dataOutputStream.write(name_size_bytes);
                 dataOutputStream.write(name_size_bytes);
-
-
-
                 getId_to_file_to_be_send.put(file_name,sending_file_path);
-
-
-
-
-
-
-
-
 
             } catch (UnknownHostException e) {
                 e.printStackTrace();
@@ -414,11 +296,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
         }
-
-
     }
-
-
 
     private class Send_packet extends Thread {
 
@@ -442,22 +320,16 @@ public class MainActivity extends AppCompatActivity {
             this.file_size = file_size;
             this.no_of_sockets = no_of_sockets;
             this.file_counting  = file_counti;
-
-
         }
-
         @Override
         public void run() {
             Socket socket = null;
             DataOutputStream dataOutputStream = null;
 
-
-
             try {
                 socket = new Socket(dstAddress, dstPort);
                 dataOutputStream = new DataOutputStream(
                         socket.getOutputStream());
-
 
                 dataOutputStream.writeBytes(TEMPORARY);
 
@@ -491,17 +363,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                 });
-
-
-
-
-
-
-
                 FileInputStream fis = (FileInputStream)getContentResolver().openInputStream(sending_file_path);
-
-
-
                 remaining_size = file_size;
 
                 fis.skip(starting_point);
@@ -615,9 +477,6 @@ public class MainActivity extends AppCompatActivity {
         long file_size;
         int no_of_sockets;
         int file_counting;
-
-
-
         String name_of_file;
         int file_percentage =0;
         ProgressBar progressBar ;
@@ -637,11 +496,7 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             Socket socket = null;
             DataInputStream dataInputStream = null;
-
-
-
             try {
-
                 socket = new Socket(dstAddress, dstPort);
                 dataInputStream = new DataInputStream(socket.getInputStream());
                 DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
@@ -653,7 +508,6 @@ public class MainActivity extends AppCompatActivity {
                 b.putInt(data_id);
                 byte[] data_id_buffer = b.array();
 
-
                 ByteBuffer b1 = ByteBuffer.allocate(8);
                 Log.d("my_error","starting_point is "+starting_point+","+file_size+","+data_id);
                 b1.putLong(starting_point);
@@ -662,8 +516,6 @@ public class MainActivity extends AppCompatActivity {
                 ByteBuffer b2 = ByteBuffer.allocate(8);
                 b2.putLong(file_size);
                 byte[] file_size_buffer = b2.array();
-
-
                 dataOutputStream.write(data_id_buffer);
                 dataOutputStream.write(starting_point_buffer);
                 dataOutputStream.write(file_size_buffer);
@@ -671,16 +523,9 @@ public class MainActivity extends AppCompatActivity {
                 byte[] temp_buffer = new byte[20] ;
 
                 dataInputStream.readFully(temp_buffer);
-
-
-
-
                 name_of_file = id_to_file_to_be_wrote.get(data_id);
-
                 myExternal_file = new File(getExternalFilesDir(null),name_of_file);
-
                 if(!myExternal_file.exists()){
-
                     myExternal_file.createNewFile();
                 }
 
@@ -689,28 +534,14 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void run() {
-
                         progressBar = inflateProgressBar(file_counting,no_of_sockets);
                         Log.d("sender",no_of_sockets+" "+file_count);
-
-
                     }
 
                 });
-
-
                 RandomAccessFile raf = new RandomAccessFile(myExternal_file,"rw");
-
                 raf.seek(starting_point);
-
-
-
-
-
                 long remaining_file = file_size;
-
-
-
                 while (remaining_file>0) {
 
                     int offset ;
@@ -720,14 +551,8 @@ public class MainActivity extends AppCompatActivity {
                     }else{
                         offset = buffer_size;
                     }
-
-
                     byte[] buffer = new byte[offset];
                     int k =dataInputStream.read(buffer);
-
-
-
-
                     raf.write(buffer,0,k);
                     remaining_file = remaining_file - k;
                     file_percentage = (int) (((float)(file_size - remaining_file)/(float)file_size)*100.0);
@@ -740,18 +565,11 @@ public class MainActivity extends AppCompatActivity {
                             progressBar.setProgress(file_percentage);
 
                         }
-
                     });
-
-
-
                 }
 
                 raf.close();
-
-
                 progressBar.setProgress(100);
-
 
             } catch (UnknownHostException e) {
                 e.printStackTrace();
@@ -794,20 +612,11 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
-
-
             }
 
         }
 
     }
-
-
-
-
-
-
-
     private class PermanentClient extends Thread{
         String acknowledgement=PERMANENT;
         String dstAddress;
@@ -833,10 +642,6 @@ public class MainActivity extends AppCompatActivity {
 
                 permanent_input = dataOutputStream;
                 dataOutputStream.writeBytes(acknowledgement);
-
-
-
-
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -849,9 +654,6 @@ public class MainActivity extends AppCompatActivity {
 
                 Jobs_completer jobs_completer = new Jobs_completer();
                 jobs_completer.start();
-
-
-
                 while (true) {
                     byte[] buffer = new byte[1];
                     dataInputStream.read(buffer);
@@ -904,16 +706,9 @@ public class MainActivity extends AppCompatActivity {
 
                             //start a send_packet socket thread
                         }
-
-
-
-
                         long remaining_data = file_size - data_length*(number_of_sockets-1);
                         Send_packet packet_sender = new Send_packet(uri_id, data_length*(number_of_sockets-1),remaining_data,id,number_of_sockets,file_count);
                         packet_sender.start();
-
-
-
 
                     }else if(message_type.equals(REQUEST)){
 
@@ -983,22 +778,12 @@ public class MainActivity extends AppCompatActivity {
                         long remaining_data = file_size - data_length*(number_of_sockets-1);
                         Recieve_packet packet_sender = new Recieve_packet(id_count-1, data_length*(number_of_sockets-1),remaining_data,number_of_sockets,file_count);
                         packet_sender.start();
-
-
-
-
-
                     }else{
                         Log.d("my_error",message_type);
 
                     }
 
-
-
                 }
-
-
-
             } catch (UnknownHostException e) {
                 e.printStackTrace();
                 final String eString = e.toString();
@@ -1059,14 +844,9 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
-
             }
-
         }
-
-
     }
-
 }
 
 

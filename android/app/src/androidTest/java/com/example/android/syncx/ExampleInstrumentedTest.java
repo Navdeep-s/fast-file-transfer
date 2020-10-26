@@ -1,4 +1,4 @@
-package com.example.fastfiletransfer;
+package com.example.android.syncx;
 
 import android.content.Context;
 
@@ -22,6 +22,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
-        assertEquals("com.example.fastfiletransfer", appContext.getPackageName());
+        assertEquals("com.example.android.syncx", appContext.getPackageName());
     }
 }

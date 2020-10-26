@@ -1,4 +1,4 @@
-package com.example.fastfiletransfer;
+package com.example.android.syncx;
 
 import org.junit.Test;
 

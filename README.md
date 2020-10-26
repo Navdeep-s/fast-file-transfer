@@ -7,7 +7,9 @@ steps
 5. Also provide feedback bitchessss because we love your supoprt!!
 
 
-Note: To change configuration again you can run configuration_selector.py file, also provide our app storage permission.
+Note0: to quit from pc side type anything on terminal and press enter
+
+Note1: To change configuration again you can run configuration_selector.py file, also provide our app storage permission.
 
 Note2: Make sure tkinter is installed on your host mahcine.
 

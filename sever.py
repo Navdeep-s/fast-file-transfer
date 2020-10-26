@@ -3,6 +3,20 @@ import socket
 import threading
 import json
 
+import sys
+
+
+
+from tkinter import *
+   
+# import filedialog module 
+from tkinter import filedialog 
+   
+
+
+
+
+
 
 while(True):
 
@@ -47,6 +61,9 @@ PACKET_FROM_CLIENT = "c"
 id_to_file_to_be_wrote = {}
 
 id_to_file_to_be_read = {} 
+
+
+name_to_path = {}
 
 
 id_count = 0
@@ -94,11 +111,10 @@ def reliable_recv(client,size):
 
 
 def send_file(name,client,number_of_socket=NUMBER_OF_SOCKETS):
-	size  = os.path.getsize(name)
+	file_size  = os.path.getsize(name_to_path[name])
 
 	name_size = len(name)
 
-	file_size = os.path.getsize(name)
 
 
 	client.sendall(bytes(REQUEST,"utf-8"))
@@ -114,12 +130,57 @@ def send_file(name,client,number_of_socket=NUMBER_OF_SOCKETS):
 	#number of sockets
 	client.sendall((number_of_socket).to_bytes(4, byteorder='big'))
 
-def typing():
-	while(True):
-		y = int(input())
-		send_file("file.mp4",permanent_socket,y)
 
 
+
+# Function for opening the  
+# file explorer window 
+def browseFiles(): 
+    filez = filedialog.askopenfilenames(parent=window,title='Choose a file')
+    paths = window.tk.splitlist(filez)
+    print(paths)
+    for u in paths:
+    	name = u.split("/")[-1]
+    	name_to_path[name]=u
+    	send_file(name, permanent_socket,NUMBER_OF_SOCKETS)
+
+
+    print(type(paths))
+       
+
+window=None
+
+
+
+def exit_function():
+    # Put any cleanup here.  
+    global window
+    permanent_socket.close()
+    window.destroy()
+    window = None
+
+
+
+def handle_gui():
+	global window	                                                                                                 
+	print("starting handle_gui ")
+	window = Tk() 
+	window.protocol('WM_DELETE_WINDOW', exit_function)
+	window.title('File Explorer') 
+	window.geometry("420x300") 
+	window.config(background = "white")
+	label_file_explorer = Label(window,  
+	                            text = "To send files click browseFiles to close click one exit or close ", 
+	                            width = 60, height = 4,  
+	                            fg = "blue") 
+	button_explore = Button(window,  
+	                        text = "Browse Files", 
+	                        command = browseFiles)  
+	
+	   
+	label_file_explorer.grid(column = 1, row = 1) 
+	button_explore.grid(column = 1, row = 3) 
+	window.mainloop()
 
 
 
@@ -197,7 +258,8 @@ def handle_packet_sending(client):
 	file_size = int.from_bytes(file_size_bytes,byteorder='big')
 
 	name = id_to_file_to_be_read[data_id]
-	file = open(name,"rb+")
+	path_of_file = name_to_path[name]
+	file = open(path_of_file,"rb+")
 	file.seek(starting_point)
 
 
@@ -332,6 +394,7 @@ def handle_request(client,number_of_socket=NUMBER_OF_SOCKETS):
 
 
 def start_permanent_reciver(client):
+	global window
 
 	print("Entered_permanet_reciver")
 
@@ -355,6 +418,8 @@ def start_permanent_reciver(client):
 	except ConnectionResetError:
 		client.close()
 
+	window.destroy()
+	window = None
 	print("Exited_permanet_reciver")
 
 
@@ -371,6 +436,8 @@ def handle_connection(client):
 	if(type_of_client==PERMANENT):
 		permanent_socket = client
 		threading.Thread(target=start_permanent_reciver, args=(client,)).start()
+		threading.Thread(target=handle_gui,).start()
+
 		
 
 	elif(type_of_client==TEMPORARY):
@@ -384,13 +451,20 @@ def handle_connection(client):
 
 
 
+
+def typing():
+	y = input()
+	print("starting exit")
+	os._exit(1)
+	print("exiteed")
+
 while True: 
 
 	print("while loop ")
+	threading.Thread(target=typing,).start()
+
 	client, addr = s.accept()	 
 	print("accepted")
-	threading.Thread(target=typing,).start()
 
 	handle_connection(client)
 
-	# threading.Thread(target=handle_connection, args=(client,)).start()

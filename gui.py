@@ -6,9 +6,10 @@ from tkinter import filedialog
 # Function for opening the  
 # file explorer window 
 def browseFiles(): 
-    while(True):
-        filez = filedialog.askopenfilenames(parent=window,title='Choose a file')
-        print (window.tk.splitlist(filez))
+    filez = filedialog.askopenfilenames(parent=window,title='Choose a file')
+    paths = window.tk.splitlist(filez)
+    print(paths)
+    print(type(paths))
        
        
                                                                                                    

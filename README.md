@@ -1,5 +1,8 @@
 # fast-file-transfer
+
+Note: packet size should be set greater than 102400 in configuration file
 steps for windos user!
+
 
 1. download sever.exe and configuration_selector.exe on your pc ,just click one sever.exe and fill the form where ip is your pc's ip
 2. now open app from android and type ip as of filled in form and click connect

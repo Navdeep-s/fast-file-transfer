@@ -2,6 +2,7 @@ package com.example.fastfiletransfer;
 
 
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -10,11 +11,13 @@ import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
+import android.os.PersistableBundle;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.util.Log;
@@ -80,10 +83,20 @@ public class MainActivity extends AppCompatActivity {
     Intent myFileIntent;
 
 
+
+    SharedPreferences sharedpreferences;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+
+
+
         setContentView(R.layout.activity_main);
+
+
 
         loginPanel = (LinearLayout)findViewById(R.id.loginpanel);
         editTextUserName = (EditText) findViewById(R.id.username);
@@ -92,6 +105,12 @@ public class MainActivity extends AppCompatActivity {
         textPort.setText("port: " + SocketServerPORT);
         buttonConnect = (Button) findViewById(R.id.connect);
 
+        sharedpreferences = getSharedPreferences("mypref",
+                Context.MODE_PRIVATE);
+        if (sharedpreferences.contains("ip")) {
+            editTextAddress.setText(sharedpreferences.getString("ip", "192.168.43.204"));
+        }
+
         buttonSend  = findViewById(R.id.Send);
         buttonConnect.setOnClickListener(buttonConnectOnClickListener);
         intent_handling();
@@ -99,8 +118,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        SharedPreferences.Editor editor = sharedpreferences.edit();
+        editor.putString("ip",editTextAddress.getText().toString());
+
+//        Log.d("ip_addr",editTextAddress.getText().toString());
+
+        editor.apply();
 
 
+    }
 
     private class Jobs_completer extends  Thread{
 
@@ -157,6 +187,10 @@ public class MainActivity extends AppCompatActivity {
 
             dstAddress = textAddress;
             dstPort = SocketServerPORT;
+
+
+
+
 
             permanentClient = new PermanentClient(textAddress, SocketServerPORT);
             permanentClient.start();

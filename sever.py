@@ -7,6 +7,7 @@ import sys
 
 
 
+
 from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog
@@ -23,7 +24,7 @@ HOSTING_PORT = 8080
 debug = False
 
 
-
+NUMBER_OF_SYNCHRONOUS_THREADS = 12
 
 REQUEST = "o"
 RESPONSE = "r"
@@ -50,13 +51,29 @@ id_count = 0
 
 
 
+def reset_all():
+	
+	global id_to_file_to_be_wrote, id_to_file_to_be_read, name_to_path,id_count
+
+	id_to_file_to_be_wrote = {}
+
+	id_to_file_to_be_read = {} 
+
+
+	name_to_path = {}
+
+
+	id_count = 0
+	print(" disconnected ")
+
+
 
 
 def printit(*values):
 	if(debug==True):
 		for u in values:
-			print(u,end = " ")
-		print("")
+			printit(u,end = " ")
+		printit("")
 
 
 	# printit('Got connection from', addr) 
@@ -83,13 +100,8 @@ def reliable_recv(client,size):
 		printit("recieved :",u)
 		return u
 	except Exception:
-		print(" disconnected")
+		printit(" disconnected")
 		is_connected = False
-
-# def reliable_send(client,data):
-# 	sent_bytes = client.send(data)
-# 	while(len(data)!=sent_bytes):
-# 		sent_bytes = sent_bytes+ client.send(data[sent_bytes:])
 
 
 
@@ -120,16 +132,23 @@ def send_file(name,client,number_of_socket=NUMBER_OF_SOCKETS):
 # Function for opening the  
 # file explorer window 
 def browseFiles(): 
-    filez = filedialog.askopenfilenames(parent=window,title='Choose a file')
-    paths = window.tk.splitlist(filez)
-    printit(paths)
-    for u in paths:
-    	name = u.split("/")[-1]
-    	name_to_path[name]=u
-    	send_file(name, permanent_socket,NUMBER_OF_SOCKETS)
+	filez = filedialog.askopenfilenames(parent=window,title='Choose a file')
+	paths = window.tk.splitlist(filez)
+	printit(paths)
+	for u in paths:
+		name = u.split("/")[-1]
+		name_to_path[name]=u
 
 
-    printit(type(paths))
+		while (threading.active_count()>NUMBER_OF_SYNCHRONOUS_THREADS):
+			printit(threading.active_count())
+
+
+		send_file(name, permanent_socket,NUMBER_OF_SOCKETS)
+		time.sleep(0.09)
+
+
+	printit(type(paths))
        
 
 window=None
@@ -137,11 +156,15 @@ window=None
 
 
 def exit_function():
-    # Put any cleanup here.  
-    global window
-    permanent_socket.close()
-    window.destroy()
-    window = None
+	# Put any cleanup here.  
+	global window
+	window.quit()
+	printit("quttting")
+	window.destroy()
+	window = None
+	printit("done quiting")
+	permanent_socket.close()
+
 
 
 
@@ -251,14 +274,14 @@ s = socket.socket()
 printit( "Socket successfully created")
 s.bind((HOSTING_IP, HOSTING_PORT))		 
 printit( "socket binded to %s" %(HOSTING_PORT) )
-s.listen(5)	 
+s.listen(20)	 
 
 
 printit(HOSTING_IP)
 permanent_socket = None
 
 
-print("\n type {} in the ip field in android app and click conenct \n make sure pc and mobile are on same network\n".format(HOSTING_IP))
+print("\n type {} in the ip field in android app and click connect \n make sure pc and mobile are on same network\n".format(HOSTING_IP))
 
 
 def open_saved_files():
@@ -277,7 +300,7 @@ def handle_gui():
 	                            width = 60, height = 4,  
 	                            fg = "blue") 
 	button_explore = Button(window,  
-	                        text = "Send files", 
+	                        text = "Send Files", 
 	                        command = browseFiles)  
 	
 	button_open = Button(window,  
@@ -288,6 +311,7 @@ def handle_gui():
 	button_explore.grid(column = 1, row = 3) 
 	button_open.grid(column = 1, row = 5)
 	window.mainloop()
+
 
 
 def get_file_handler_to_write(data_id):
@@ -363,7 +387,19 @@ def handle_packet_sending(client):
 	starting_point = int.from_bytes(starting_point_bytes, byteorder='big')
 	file_size = int.from_bytes(file_size_bytes,byteorder='big')
 
-	name = id_to_file_to_be_read[data_id]
+
+	printit(id_to_file_to_be_read)
+
+	
+
+	while True:
+		try:
+			name = id_to_file_to_be_read[data_id]
+			break
+		except KeyError:
+			time.sleep(0.01)
+			printit("wainting for key")
+
 	path_of_file = name_to_path[name]
 	file = open(path_of_file,"rb+")
 	file.seek(starting_point)
@@ -408,10 +444,10 @@ def handle_temporary_client(client):
 
 	r= r.decode("utf-8")
 	if(r==PACKET_FROM_CLIENT):
-		threading.Thread(target=handle_packet_recieving, args=(client,)).start()
+		threading.Thread(target=handle_packet_recieving,name="handle_packet_recieving", args=(client,)).start()
 
 	elif(r==PACKET_FROM_SERVER):
-		threading.Thread(target=handle_packet_sending, args=(client,)).start()
+		threading.Thread(target=handle_packet_sending,name="handle_paket_sending", args=(client,)).start()
 
 	else:
 		printit("unkonwn type of non permanent connection \n closing it")
@@ -429,18 +465,15 @@ def handle_response(client):
 
 	printit("Entered_handle_response")
 
+	
+
 
 	global id_to_file_to_be_read
 	name_size_bytes = reliable_recv(client,4)
 	name_size= int.from_bytes(name_size_bytes, byteorder='big')
 	name_bytes = reliable_recv(client,name_size)
 	name = name_bytes.decode("utf-8")
-	# while (os.path.exists(name)):
-	# 	lis = name.split(".")
-	# 	name = lis[0]+"1." + ".".join(lis[1:])
 
-	# id_to_file_to_be_wrote[id_count] = name
-	# id_count= id_count+1
 
 	file_size_bytes = reliable_recv(client,8)
 	data_id_bytes = reliable_recv(client,4)
@@ -452,6 +485,11 @@ def handle_response(client):
 
 	id_to_file_to_be_read[data_id] = name
 
+
+	# time.sleep(0.01)
+	#to acknowledge the phone and all data have been registered
+	# client.sendall(data_id_bytes)
+
 	printit("Exited_handle_response")
 
 
@@ -460,8 +498,15 @@ def handle_response(client):
 
 def handle_request(client,number_of_socket=NUMBER_OF_SOCKETS):
 
+
+
 	printit("Entered_handle_request")
 
+	time.sleep(0.09)
+	while (threading.active_count()>NUMBER_OF_SYNCHRONOUS_THREADS):
+		printit(threading.active_count())
+
+			
 
 	global id_to_file_to_be_wrote,id_count
 	name_size_bytes = reliable_recv(client,4)
@@ -499,6 +544,11 @@ def handle_request(client,number_of_socket=NUMBER_OF_SOCKETS):
 
 
 
+def quit(r):
+	r.destroy()
+	printit("distroyed")
+
+
 def start_permanent_reciver(client):
 	global window,is_connected
 	is_connected = True
@@ -507,11 +557,19 @@ def start_permanent_reciver(client):
 
 	printit("Entered_permanet_reciver")
 
+
+
 	try:
+
+
+	
+		
 
 		u = reliable_recv(client,1)
 		while(u):
-			
+
+
+
 			type_of_message = u.decode("utf-8")
 			if(type_of_message==REQUEST):
 				handle_request(client)			
@@ -528,10 +586,21 @@ def start_permanent_reciver(client):
 		client.close()
 
 	is_connected = False
-	print("  disconnected")
-	window.destroy()
-	window = None
+	printit("  disconnected from permatnet" )
 	printit("Exited_permanet_reciver")
+	reset_all()
+	try:
+		if(window!=None):
+			printit("window not none")
+			window.quit()		
+			window.destroy()
+	except Exception:
+		pass
+
+
+	# window = None
+	printit("the end")
+	
 
 
 
@@ -541,18 +610,20 @@ def handle_connection(client):
 
 
 	global permanent_socket
+
+
 	u = reliable_recv(client,1)
 	type_of_client = u.decode("utf-8")	
 
 	if(type_of_client==PERMANENT):
 		permanent_socket = client
-		threading.Thread(target=start_permanent_reciver, args=(client,)).start()
-		threading.Thread(target=handle_gui,).start()
+		threading.Thread(target=start_permanent_reciver,name="permanent", args=(client,)).start()
+		threading.Thread(target=handle_gui,name="gui").start()
 
 		
 
 	elif(type_of_client==TEMPORARY):
-		threading.Thread(target=handle_temporary_client, args=(client,)).start()
+		threading.Thread(target=handle_temporary_client,name="temporary", args=(client,)).start()
 	else:
 		printit("unkonwn type of connection disconnecting")
 		client.close()
@@ -572,14 +643,15 @@ def typing():
 			print("Thanks for using")
 		elif(y=="o"):
 			os.startfile(path_of_saving_files)
-
-		
-
+		for thread in threading.enumerate(): 
+			printit(thread.name)
+			# if thread.name == "permanent":
+			# 	print(dir(thread))
 
 
 print(" type connect on android app to connect")
 print(" 1. type q to quit\n 2. type o to open saving folder\n 3. to change configuration change values in configuration.json file")
-threading.Thread(target=typing,).start()
+threading.Thread(target=typing,name="typing").start()
 
 while True: 
 
@@ -587,4 +659,7 @@ while True:
 
 	client, addr = s.accept()	 
 	printit("accepted")
+	
+	printit(threading.active_count())
+			
 	handle_connection(client)

@@ -749,7 +749,7 @@ public class MainActivity extends AppCompatActivity {
 
                 raf.close();
 
-
+                while(progressBar==null){}
                 progressBar.setProgress(100);
 
 
@@ -962,6 +962,12 @@ public class MainActivity extends AppCompatActivity {
                         dataOutputStream.write(file_size_buffer);
                         dataOutputStream.write(id_buffer);
                         dataOutputStream.write(socket_bytes);
+
+//                        byte[] ack = new byte[4];
+
+//                        dataInputStream.readFully(ack);
+
+
 
                         long data_length = file_size/number_of_sockets;
                         file_count++;

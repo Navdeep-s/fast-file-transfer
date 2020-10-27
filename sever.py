@@ -7,7 +7,6 @@ import sys
 
 
 
-
 from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog
@@ -566,12 +565,15 @@ def typing():
 			printit("starting exit")
 			os._exit(1)
 			print("Thanks for using")
+		elif(y=="o"):
+			os.startfile(path_of_saving_files)
+
 		
 
 
 
 print(" type connect on android app to connect")
-print(" type q to quit to change configuration change values in configuration.json file")
+print(" 1. type q to quit\n 2. type o to open saving folder\n 3. to change configuration change values in configuration.json file")
 threading.Thread(target=typing,).start()
 
 while True: 

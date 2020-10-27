@@ -51,6 +51,11 @@ id_count = 0
 
 
 
+def get_optimal_sockets(file_size):
+	return min(int(file_size/25000000)+1,8) 
+
+
+
 def reset_all():
 	
 	global id_to_file_to_be_wrote, id_to_file_to_be_read, name_to_path,id_count
@@ -103,6 +108,11 @@ def reliable_recv(client,size):
 		printit(" disconnected")
 		is_connected = False
 
+# def reliable_send(client,data):
+# 	sent_bytes = client.send(data)
+# 	while(len(data)!=sent_bytes):
+# 		sent_bytes = sent_bytes+ client.send(data[sent_bytes:])
+
 
 
 
@@ -124,6 +134,7 @@ def send_file(name,client,number_of_socket=NUMBER_OF_SOCKETS):
 	#id
 	client.sendall(int(5).to_bytes(4, byteorder='big'))
 	#number of sockets
+	number_of_socket = get_optimal_sockets(file_size)
 	client.sendall((number_of_socket).to_bytes(4, byteorder='big'))
 
 
@@ -524,6 +535,8 @@ def handle_request(client,number_of_socket=NUMBER_OF_SOCKETS):
 	data_id_bytes = reliable_recv(client,4)
 	socket_numbers_bytes = reliable_recv(client,4)
 
+	file_size = int.from_bytes(file_size_bytes, byteorder='big')
+
 	printit("request came",name,file_size_bytes)
 	#send the pakket
 	#char
@@ -538,6 +551,7 @@ def handle_request(client,number_of_socket=NUMBER_OF_SOCKETS):
 	#id
 	client.sendall((id_count-1).to_bytes(4, byteorder='big'))
 	#number of sockets
+	number_of_socket = get_optimal_sockets(file_size) 
 	client.sendall((number_of_socket).to_bytes(4, byteorder='big'))
 
 	printit("Exited_handle_request")

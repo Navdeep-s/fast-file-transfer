@@ -7,41 +7,21 @@ import sys
 
 
 
+
 from tkinter import *
-   
-# import filedialog module 
-from tkinter import filedialog 
-   
+from tkinter import ttk
+from tkinter import filedialog
+
+from tkinter import messagebox
 
 
+BUFFER_SIZE = 102400
+path_of_saving_files=""
+HOSTING_IP = ""
+HOSTING_PORT = 8080
 
 
-
-
-while(True):
-
-	try:
-
-		f = open("configuration.json","r")
-		dic = json.load(f)
-
-
-
-
-
-		BUFFER_SIZE = int(dic["buffer_size"])
-		path_of_saving_files = dic["saving_path"]
-		HOSTING_IP = dic["hosting_ip"]
-		HOSTING_PORT = 8080
-
-		f.close()
-		break
-	except Exception:
-		#change here python3 to python if on windows 
-		os.system("python3 configuration_selector.py")
-
-
-
+debug = False
 
 
 
@@ -57,7 +37,7 @@ PACKET_FROM_CLIENT = "c"
 
 
 
-
+is_connected= False
 
 id_to_file_to_be_wrote = {}
 
@@ -70,17 +50,17 @@ name_to_path = {}
 id_count = 0
 
 
-s = socket.socket()		 
-print( "Socket successfully created")
-s.bind((HOSTING_IP, HOSTING_PORT))		 
-print( "socket binded to %s" %(HOSTING_PORT) )
-s.listen(5)	 
 
-permanent_socket = None
 
-print ("socket is listening")
 
-	# print('Got connection from', addr) 
+def printit(*values):
+	if(debug==True):
+		for u in values:
+			print(u,end = " ")
+		print("")
+
+
+	# printit('Got connection from', addr) 
 
 
 	# client.send('Thank you for connecting') 
@@ -90,18 +70,22 @@ print ("socket is listening")
 
 
 def reliable_recv(client,size):
-	u = client.recv(size)
+	global is_connected
+	try:
+		u = client.recv(size)
 
-	while(not len(u)==size):
-		recv_bytes = client.recv(size-len(u))
-		if(len(recv_bytes)==0):
-			print("socket closed")
-			return
-		u = u + recv_bytes
+		while(not len(u)==size):
+			recv_bytes = client.recv(size-len(u))
+			if(len(recv_bytes)==0):
+				printit("socket closed")
+				return
+			u = u + recv_bytes
 
-	print("recieved :",u)
-	return u
-
+		printit("recieved :",u)
+		return u
+	except Exception:
+		print(" disconnected")
+		is_connected = False
 
 # def reliable_send(client,data):
 # 	sent_bytes = client.send(data)
@@ -139,14 +123,14 @@ def send_file(name,client,number_of_socket=NUMBER_OF_SOCKETS):
 def browseFiles(): 
     filez = filedialog.askopenfilenames(parent=window,title='Choose a file')
     paths = window.tk.splitlist(filez)
-    print(paths)
+    printit(paths)
     for u in paths:
     	name = u.split("/")[-1]
     	name_to_path[name]=u
     	send_file(name, permanent_socket,NUMBER_OF_SOCKETS)
 
 
-    print(type(paths))
+    printit(type(paths))
        
 
 window=None
@@ -162,9 +146,126 @@ def exit_function():
 
 
 
+
+ip_config,saving_path_config,buffer_size_config = None, None, None
+
+def do_changes():
+
+	dic = {
+    "saving_path": saving_path_config,
+    "hosting_ip": ip_config,
+    "buffer_size": buffer_size_config
+		}
+
+	with open('configuration.json', 'w') as outfile:
+		json.dump(dic, outfile)
+
+
+label_4 = None
+entry_1 = None
+entry_3 = None
+configuration_window=None
+
+def getFolderPath():
+	global saving_path_config
+	folder_selected = filedialog.askdirectory()
+	label_4.config(text = folder_selected)
+	saving_path_config = folder_selected
+	# label_4.labelText = folderPath
+    # label_4.depositLabel.config(text=folder_selected)
+
+    
+
+
+def submit():
+	global ip_config, buffer_size_config,configuration_window
+	try:
+		ip_config = entry_1.get()
+		buffer_size_config = int(entry_3.get())
+		do_changes()
+		configuration_window.destroy()
+		configuration_window = None
+		printit(saving_path_config,ip_config,buffer_size_config)
+	except Exception as e :
+		printit(e)
+		messagebox.showerror("Error", "Please fill the boxes correctly")
+
+
+
+
+def configuration():
+	global label_4,entry_3,entry_1,configuration_window
+	configuration_window = Tk()
+
+	configuration_window.geometry("500x500")
+	configuration_window.title('Configuration Master')
+	label_0 =Label(configuration_window,text="Configuration master", width=20,font=("bold",20))
+	label_0.place(x=90,y=60)
+	label_1 =Label(configuration_window,text="Ip address", width=20,font=("bold",10))
+	label_1.place(x=80,y=130)
+	entry_1=Entry(configuration_window)
+	entry_1.place(x=240,y=130)
+	label_3 =Label(configuration_window,text="Buffer Size", width=20,font=("bold",10))
+	label_3.place(x=68,y=180)
+	entry_3=Entry(configuration_window)
+	entry_3.place(x=240,y=180)
+	label_4 =Label(configuration_window,text="Path to save files", width=20,font=("bold",10))
+	label_4.place(x=70,y=230)
+	var=IntVar()
+	btnFind = ttk.Button(configuration_window, text="Browse Folder",command=getFolderPath)
+	btnFind.place(x=235,y=230)
+	Button(configuration_window, text='Done' , width=20,bg="black",fg='white',command=submit).place(x=180,y=380)
+	configuration_window.mainloop()
+
+
+
+
+while(True):
+
+	try:
+
+		f = open("configuration.json","r")
+		dic = json.load(f)
+
+
+
+
+
+		BUFFER_SIZE = int(dic["buffer_size"])
+		path_of_saving_files = dic["saving_path"]
+		HOSTING_IP = dic["hosting_ip"]
+		HOSTING_PORT = 8080
+
+		f.close()
+		break
+	except Exception:
+		#change here python3 to python if on windows 
+		# os.system("python3 configuration_selector.py")
+		configuration()
+
+
+
+
+
+
+s = socket.socket()		 
+printit( "Socket successfully created")
+s.bind((HOSTING_IP, HOSTING_PORT))		 
+printit( "socket binded to %s" %(HOSTING_PORT) )
+s.listen(5)	 
+
+
+printit(HOSTING_IP)
+permanent_socket = None
+
+
+print("\n type {} in the ip field in android app and click conenct \n make sure pc and mobile are on same network\n".format(HOSTING_IP))
+
+
+
 def handle_gui():
 	global window	                                                                                                 
-	print("starting handle_gui ")
+	printit("starting handle_gui ")
 	window = Tk() 
 	window.protocol('WM_DELETE_WINDOW', exit_function)
 	window.title('File Explorer') 
@@ -192,10 +293,10 @@ def get_file_handler_to_write(data_id):
 	if(not os.path.exists(name)):
 
 		y = open(name,"ab+")
-		print("opening\n\n\n\n\n\n\n\n\n.....")
+		printit("opening\n\n\n\n\n\n\n\n\n.....")
 		y.close()
 
-	print("opening {}\n\n\n\n\n\n........".format(name))
+	printit("opening {}\n\n\n\n\n\n........".format(name))
 	y= open(name, "rb+")
 	return y
 
@@ -203,7 +304,7 @@ def get_file_handler_to_write(data_id):
 
 def handle_packet_recieving(client):
 
-	print("Entered_handle_data_recieving")
+	printit("Entered_handle_data_recieving")
 
 	#recive header
 	data_id = reliable_recv(client,4)
@@ -217,7 +318,7 @@ def handle_packet_recieving(client):
 	data_id  = int.from_bytes(data_id, byteorder='big')
 	file = get_file_handler_to_write(data_id)
 	starting_point = int.from_bytes(starting_point, byteorder='big')
-	print("stating point ",starting_point)
+	printit("stating point ",starting_point)
 	file_size = int.from_bytes(file_size,byteorder='big')
 
 
@@ -227,23 +328,23 @@ def handle_packet_recieving(client):
 	start = time.time()
 	while(bytes_recived<file_size):
 
-		# print(bytes_recived,file_size)
+		# printit(bytes_recived,file_size)
 		data_bytes = client.recv(BUFFER_SIZE)
 		bytes_recived = bytes_recived +len(data_bytes)
 		file.write(data_bytes)
 
 	file.close()
 	end = time.time()
-	# print("closing {}\n\n\n\n\n\n........".format(data_id))
+	# printit("closing {}\n\n\n\n\n\n........".format(data_id))
 
 	client.close()
 
-	print("time take is : ", end - start)
-	print("Exited_handle_data_recieving")
+	printit("time take is : ", end - start)
+	printit("Exited_handle_data_recieving")
 
 def handle_packet_sending(client):
 
-	print("Entered_handle_packet_sending")
+	printit("Entered_handle_packet_sending")
 
 	#reciver header
 	data_id_bytes = reliable_recv(client,4)
@@ -252,7 +353,7 @@ def handle_packet_sending(client):
 
 
 
-	print("recieved id")
+	printit("recieved id")
 
 	data_id = int.from_bytes(data_id_bytes, byteorder='big')
 	starting_point = int.from_bytes(starting_point_bytes, byteorder='big')
@@ -284,19 +385,19 @@ def handle_packet_sending(client):
 	end_time = time.time()
 
 
-	print("time_taken",end_time-start_time)		
+	printit("time_taken",end_time-start_time)		
 
 	file.close()
 	client.close()
 
 
-	print("Exited_handle_packet_sending")
+	printit("Exited_handle_packet_sending")
 
 
 
 def handle_temporary_client(client):
 
-	print("Entered_handle_temporary_client")
+	printit("Entered_handle_temporary_client")
 
 
 	r = reliable_recv(client,1)
@@ -309,10 +410,10 @@ def handle_temporary_client(client):
 		threading.Thread(target=handle_packet_sending, args=(client,)).start()
 
 	else:
-		print("unkonwn type of non permanent connection \n closing it")
+		printit("unkonwn type of non permanent connection \n closing it")
 		client.close()
 
-	print("Exited_handle_temporary_client")
+	printit("Exited_handle_temporary_client")
 
 
 
@@ -322,7 +423,7 @@ def handle_temporary_client(client):
 
 def handle_response(client):
 
-	print("Entered_handle_response")
+	printit("Entered_handle_response")
 
 
 	global id_to_file_to_be_read
@@ -347,7 +448,7 @@ def handle_response(client):
 
 	id_to_file_to_be_read[data_id] = name
 
-	print("Exited_handle_response")
+	printit("Exited_handle_response")
 
 
 
@@ -355,7 +456,7 @@ def handle_response(client):
 
 def handle_request(client,number_of_socket=NUMBER_OF_SOCKETS):
 
-	print("Entered_handle_request")
+	printit("Entered_handle_request")
 
 
 	global id_to_file_to_be_wrote,id_count
@@ -374,7 +475,7 @@ def handle_request(client,number_of_socket=NUMBER_OF_SOCKETS):
 	data_id_bytes = reliable_recv(client,4)
 	socket_numbers_bytes = reliable_recv(client,4)
 
-	print("request came",name,file_size_bytes)
+	printit("request came",name,file_size_bytes)
 	#send the pakket
 	#char
 	client.sendall(bytes(RESPONSE,"utf-8"))
@@ -390,14 +491,17 @@ def handle_request(client,number_of_socket=NUMBER_OF_SOCKETS):
 	#number of sockets
 	client.sendall((number_of_socket).to_bytes(4, byteorder='big'))
 
-	print("Exited_handle_request")
+	printit("Exited_handle_request")
 
 
 
 def start_permanent_reciver(client):
-	global window
+	global window,is_connected
+	is_connected = True
+	print(" connected")
 
-	print("Entered_permanet_reciver")
+
+	printit("Entered_permanet_reciver")
 
 	try:
 
@@ -412,22 +516,24 @@ def start_permanent_reciver(client):
 				
 			else:
 
-				print("unknown type of message : ",type_of_message)
+				printit("unknown type of message : ",type_of_message)
 
 			u = reliable_recv(client,1)
 
 	except ConnectionResetError:
 		client.close()
 
+	is_connected = False
+	print("  disconnected")
 	window.destroy()
 	window = None
-	print("Exited_permanet_reciver")
+	printit("Exited_permanet_reciver")
 
 
 
 #first message to this funciton 
 def handle_connection(client):
-	print("Entered handle_connection")
+	printit("Entered handle_connection")
 
 
 	global permanent_socket
@@ -444,31 +550,34 @@ def handle_connection(client):
 	elif(type_of_client==TEMPORARY):
 		threading.Thread(target=handle_temporary_client, args=(client,)).start()
 	else:
-		print("unkonwn type of connection disconnecting")
+		printit("unkonwn type of connection disconnecting")
 		client.close()
 
 
-	print("Exited handle_connection")
+	printit("Exited handle_connection")
 
 
 
 
 def typing():
-	y = input()
-	print("starting exit")
-	os._exit(1)
-	print("exiteed")
+	while True:
+		y = input()
+		if(y=="q"):
+			printit("starting exit")
+			os._exit(1)
+			print("Thanks for using")
+		
 
 
 
+print(" type connect on android app to connect")
+print(" type q to quit to change configuration change values in configuration.json file")
 threading.Thread(target=typing,).start()
 
 while True: 
 
-	print("while loop ")
+	printit("while loop ")
 
 	client, addr = s.accept()	 
-	print("accepted")
-
+	printit("accepted")
 	handle_connection(client)
-

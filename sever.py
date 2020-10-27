@@ -261,6 +261,8 @@ permanent_socket = None
 print("\n type {} in the ip field in android app and click conenct \n make sure pc and mobile are on same network\n".format(HOSTING_IP))
 
 
+def open_saved_files():
+	os.startfile(path_of_saving_files)
 
 def handle_gui():
 	global window	                                                                                                 
@@ -275,14 +277,17 @@ def handle_gui():
 	                            width = 60, height = 4,  
 	                            fg = "blue") 
 	button_explore = Button(window,  
-	                        text = "Browse Files", 
+	                        text = "Send files", 
 	                        command = browseFiles)  
 	
+	button_open = Button(window,  
+	                        text = "open saved files", 
+	                        command = open_saved_files)  
 	   
 	label_file_explorer.grid(column = 1, row = 1) 
 	button_explore.grid(column = 1, row = 3) 
+	button_open.grid(column = 1, row = 5)
 	window.mainloop()
-
 
 
 def get_file_handler_to_write(data_id):

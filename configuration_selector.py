@@ -1,33 +1,4 @@
-# from tkinter import *
-# from tkinter import ttk
-# from tkinter import filedialog
-# gui = Tk()
-# gui.geometry("400x400")
-# gui.title("FC")
 
-# def getFolderPath():
-#     folder_selected = filedialog.askdirectory()
-#     folderPath.set(folder_selected)
-
-# def doStuff():
-#     folder = folderPath.get()
-#     print("Doing stuff with folder", folder)
-
-# folderPath = StringVar()
-# a = Label(gui ,text="Select folder where you want to save your files")
-# a.grid(row=0,column = 0)
-# # E = Entry(gui,textvariable=folderPath)
-# # E.grid(row=0,column=1)
-# btnFind = ttk.Button(gui, text="Browse Folder",command=getFolderPath)
-# btnFind.grid(row=0,column=2)
-
-# c = ttk.Button(gui ,text="find", command=doStuff)
-# c.grid(row=4,column=0)
-# gui.mainloop()
-
-
-#how to create simple GUI registration form.
-#importing tkinter module for GUI application
 
 from tkinter import *
 from tkinter import ttk
@@ -61,6 +32,51 @@ def getFolderPath():
     
 
 
+#Providing Geometry to the form
+root.geometry("500x500")
+
+#Providing title to the form
+root.title('Configuration Master')
+
+#this creates 'Label' widget for Registration Form and uses place() method.
+label_0 =Label(root,text="Configuration master", width=20,font=("bold",20))
+#place method in tkinter is  geometry manager it is used to organize widgets by placing them in specific position
+label_0.place(x=90,y=60)
+
+#this creates 'Label' widget for Fullname and uses place() method.
+label_1 =Label(root,text="Ip address", width=20,font=("bold",10))
+label_1.place(x=80,y=130)
+
+#this will accept the input string text from the user.
+entry_1=Entry(root)
+entry_1.place(x=240,y=130)
+
+#this creates 'Label' widget for Email and uses place() method.
+label_3 =Label(root,text="Buffer Size", width=20,font=("bold",10))
+label_3.place(x=68,y=180)
+
+entry_3=Entry(root)
+entry_3.place(x=240,y=180)
+
+
+
+# 
+
+#this creates 'Label' widget for Gender and uses place() method.
+label_4 =Label(root,text="Path to save files", width=20,font=("bold",10))
+label_4.place(x=70,y=230)
+
+
+#the variable 'var' mentioned here holds Integer Value, by deault 0
+var=IntVar()
+
+
+
+btnFind = ttk.Button(root, text="Browse Folder",command=getFolderPath)
+btnFind.place(x=235,y=230)
+#this creates 'Radio button' widget and uses place() method
+
+
 def do_changes():
 
 	dic = {
@@ -86,22 +102,10 @@ def submit():
 
 
 
-root.geometry("500x500")
-root.title('Configuration Master')
-label_0 =Label(root,text="Configuration master", width=20,font=("bold",20))
-label_0.place(x=90,y=60)
-label_1 =Label(root,text="Ip address", width=20,font=("bold",10))
-label_1.place(x=80,y=130)
-entry_1=Entry(root)
-entry_1.place(x=240,y=130)
-label_3 =Label(root,text="Buffer Size", width=20,font=("bold",10))
-label_3.place(x=68,y=180)
-entry_3=Entry(root)
-entry_3.place(x=240,y=180)
-label_4 =Label(root,text="Path to save files", width=20,font=("bold",10))
-label_4.place(x=70,y=230)
-var=IntVar()
-btnFind = ttk.Button(root, text="Browse Folder",command=getFolderPath)
-btnFind.place(x=235,y=230)
+#this creates button for submitting the details provides by the user
+
 Button(root, text='Done' , width=20,bg="black",fg='white',command=submit).place(x=180,y=380)
+
+
+#this will run the mainloop.
 root.mainloop()

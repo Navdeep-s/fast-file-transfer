@@ -273,7 +273,7 @@ def handle_gui():
 	window.geometry("420x300") 
 	window.config(background = "white")
 	label_file_explorer = Label(window,  
-	                            text = "To send files click browseFiles to close click one exit or close ", 
+	                            text = "To send files click Send Files, to close click one exit or close ", 
 	                            width = 60, height = 4,  
 	                            fg = "blue") 
 	button_explore = Button(window,  

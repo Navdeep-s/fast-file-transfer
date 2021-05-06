@@ -7,13 +7,12 @@ steps for windows user!
 1. download sever.exe and configuration_selector.exe on your pc ,just click one sever.exe and fill the form where ip is your pc's ip which can be found by ipconfig command if you don't know it already.
 2. download and install the apk file on android and now open app from android and type ip as of filled in form and click connect
 3. send file to and fro
-4. to exit from pc type anythin on console.
 
 
 
 
 
-steps for typical so called "mac" and "linux"
+steps for so called "mac" and "linux" users
 
 
 1. first install test.apk in your android device
@@ -23,10 +22,10 @@ steps for typical so called "mac" and "linux"
 5. Also provide feedback bitchessss because we love your supoprt!!
 
 
-Note0: to quit from pc side type anything on terminal and press enter
+Note0: to quit from pc side q on terminal and press enter
 
-Note1: To change configuration again you can run configuration_selector.py file, also provide our app storage permission.
+Note1: To change configuration again you can run configuration_selector.py file, also provide our app storage permission in your android device.
 
-Note2: Make sure tkinter is installed on your host mahcine.
+Note2: Make sure tkinter is installed on your host mahcine (only for mac and linux users).
 
 Note3: Just give whatever premission it requres, have faith no viruses  are  implanted !!

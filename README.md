@@ -21,9 +21,10 @@ steps for windows user!
 
 
 ## Side Notes
-* to quit from pc side q on terminal and press enter
 
-* To change configuration again you can run configuration_selector.py file, also provide our app storage permission in your android device.
+* To change configuration again you can run configuration_selector.py file
+* 
+* Also provide our app storage permission in your android device.
 
 * Make sure tkinter is installed on your host mahcine (only for mac and linux users).
 

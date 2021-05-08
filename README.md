@@ -7,9 +7,9 @@ steps for windows user!
 
 
 ### Windows
-1 download sever.exe and configuration_selector.exe on your pc ,just click one sever.exe and fill the form where ip is your pc's ip which can be found by ipconfig command if you don't know it already.
-2 download and install the apk file on android and now open app from android and type ip as of filled in form and click connect
-3 send file to and fro
+1. download sever.exe and configuration_selector.exe on your pc ,just click one sever.exe and fill the form where ip is your pc's ip which can be found by ipconfig command if you don't know it already.
+2. download and install the apk file on android and now open app from android and type ip as of filled in form and click connect
+3. send file to and fro
 
 
 ### Mac/Linux

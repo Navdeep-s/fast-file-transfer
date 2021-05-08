@@ -20,7 +20,7 @@ steps for windows user!
 5. Also provide feedback bitchessss because we love your supoprt!!
 
 
-**Note**
+##Side Notes
 * to quit from pc side q on terminal and press enter
 
 * To change configuration again you can run configuration_selector.py file, also provide our app storage permission in your android device.

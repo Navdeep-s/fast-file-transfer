@@ -1,20 +1,18 @@
-# fast-file-transfer
+# Fast File Transfer
 
-Note: packet size should be set greater than 102400 in configuration file
+**Note**: packet size should be set greater than 102400 in configuration file
 steps for windows user!
 
+## Installation
 
+
+### Windows
 1. download sever.exe and configuration_selector.exe on your pc ,just click one sever.exe and fill the form where ip is your pc's ip which can be found by ipconfig command if you don't know it already.
 2. download and install the apk file on android and now open app from android and type ip as of filled in form and click connect
 3. send file to and fro
 
 
-
-
-
-steps for so called "mac" and "linux" users
-
-
+### Mac/Linux
 1. first install test.apk in your android device
 2. then run sever.py file on your pc configuration panel will appear fill it.
 3. once completed then app will start in terminal with lots of debuging information don't worry about that.
@@ -22,10 +20,11 @@ steps for so called "mac" and "linux" users
 5. Also provide feedback bitchessss because we love your supoprt!!
 
 
-Note0: to quit from pc side q on terminal and press enter
+**Note**
+* to quit from pc side q on terminal and press enter
 
-Note1: To change configuration again you can run configuration_selector.py file, also provide our app storage permission in your android device.
+* To change configuration again you can run configuration_selector.py file, also provide our app storage permission in your android device.
 
-Note2: Make sure tkinter is installed on your host mahcine (only for mac and linux users).
+* Make sure tkinter is installed on your host mahcine (only for mac and linux users).
 
-Note3: Just give whatever premission it requres, have faith no viruses  are  implanted !!
+* Just give whatever premission it requres, have faith no viruses  are  implanted !!

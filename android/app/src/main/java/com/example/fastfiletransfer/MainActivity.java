@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
     int id_count = 0;
     int file_count = 0;
     List<Uri> jobs=new LinkedList<>();
-
+    File saving_folder;
     DataOutputStream permanent_input;
     Hashtable<Integer, String> id_to_file_to_be_wrote=new Hashtable<>();
     Hashtable<String, Uri> getId_to_file_to_be_send=new Hashtable<>();
@@ -96,10 +96,23 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
+        saving_folder = new File(Environment.getExternalStorageDirectory() +
+                File.separator + "FastFileTransfer");
+        boolean success = true;
+        if (!saving_folder.exists()) {
+            success = saving_folder.mkdirs();
+        }
+        if (success) {
+            // Do something on success
+        } else {
+            Toast.makeText(MainActivity.this, "Please provide storage permission",
+                    Toast.LENGTH_LONG).show();
+            // Do something else on failure
+        }
+
 
 
         loginPanel = (LinearLayout)findViewById(R.id.loginpanel);
-        editTextUserName = (EditText) findViewById(R.id.username);
         editTextAddress = (EditText) findViewById(R.id.address);
         textPort = (TextView) findViewById(R.id.port);
         textPort.setText("port: " + SocketServerPORT);
@@ -169,12 +182,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         public void onClick(View v) {
-            String textUserName = editTextUserName.getText().toString();
-            if (textUserName.equals("")) {
-                Toast.makeText(MainActivity.this, "Enter User Name",
-                        Toast.LENGTH_LONG).show();
-                return;
-            }
+
 
             String textAddress = editTextAddress.getText().toString();
             if (textAddress.equals("")) {
@@ -228,12 +236,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void initiate_send(View view) {
-        String textUserName = editTextUserName.getText().toString();
-        if (textUserName.equals("")) {
-            Toast.makeText(MainActivity.this, "Enter User Name",
-                    Toast.LENGTH_LONG).show();
-            return;
-        }
+
 
         textAddress = editTextAddress.getText().toString();
         if (textAddress.equals("")) {
@@ -677,7 +680,7 @@ public class MainActivity extends AppCompatActivity {
 
                 name_of_file = id_to_file_to_be_wrote.get(data_id);
 
-                myExternal_file = new File(getExternalFilesDir(null),name_of_file);
+                myExternal_file = new File(saving_folder,name_of_file);
 
                 if(!myExternal_file.exists()){
 

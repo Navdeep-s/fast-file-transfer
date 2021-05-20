@@ -6,11 +6,12 @@
     tools:context=".MainActivity" >
 
 
-
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="File Exchanger"
+        android:text="Server's Ip :"
+        android:paddingLeft="6dp"
+
         android:textStyle="bold" />
 
     <LinearLayout
@@ -19,13 +20,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:visibility="visible" >
-
-        <EditText
-            android:id="@+id/username"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="User name"
-            android:text="navdeep " />
 
         <EditText
             android:id="@+id/address"

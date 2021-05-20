@@ -7,8 +7,9 @@ steps for windows user !
 
 
 ### Windows
-1. download sever.exe and configuration_selector.exe on your pc ,just click one sever.exe and fill the form where ip is your pc's ip which can be found by ipconfig command if you don't know it already.
-2. download and install the apk file on android and now open app from android and type ip as of filled in form and click connect
+1. download sever.exe, just click one sever.exe and fill the form where you need to choose the folder where you want your files to be saved and packet size whose value can be experimented with but 102400 recomended.
+2. download and install the apk file on android 
+3. Now open app from android and type ip which is shown on your computer screen terminal and click connect
 3. send file to and fro
 
 
@@ -23,7 +24,7 @@ steps for windows user !
 ## Side Notes
 
 * To change configuration again you can run configuration_selector.py file
-* 
+
 * Also provide our app storage permission in your android device.
 
 * Make sure tkinter is installed on your host mahcine (only for mac and linux users).

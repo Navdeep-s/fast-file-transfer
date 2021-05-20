@@ -213,7 +213,7 @@ def getFolderPath():
 def submit():
 	global ip_config, buffer_size_config,configuration_window
 	try:
-		ip_config = entry_1.get()
+		ip_config = "192.168.48.01"
 		buffer_size_config = int(entry_3.get())
 		do_changes()
 		configuration_window.destroy()
@@ -234,10 +234,10 @@ def configuration():
 	configuration_window.title('Configuration Master')
 	label_0 =Label(configuration_window,text="Configuration master", width=20,font=("bold",20))
 	label_0.place(x=90,y=60)
-	label_1 =Label(configuration_window,text="Ip address", width=20,font=("bold",10))
-	label_1.place(x=80,y=130)
-	entry_1=Entry(configuration_window)
-	entry_1.place(x=240,y=130)
+	# label_1 =Label(configuration_window,text="Ip address", width=20,font=("bold",10))
+	# label_1.place(x=80,y=130)
+	# entry_1=Entry(configuration_window)
+	# entry_1.place(x=240,y=130)
 	label_3 =Label(configuration_window,text="Buffer Size", width=20,font=("bold",10))
 	label_3.place(x=68,y=180)
 	entry_3=Entry(configuration_window)
@@ -277,7 +277,9 @@ while(True):
 		configuration()
 
 
-
+with socket.socket(socket.AF_INET,socket.SOCK_DGRAM) as s:
+	s.connect(("8.8.8.8",53))
+	HOSTING_IP = s.getsockname()[0]
 
 
 

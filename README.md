@@ -1,7 +1,7 @@
 # Fast File Transfer
 
 **Note**: packet size should be set greater than 102400 in configuration file
-steps for windows user!
+steps for windows user !
 
 ## Installation
 

@@ -1,7 +1,7 @@
 # Fast File Transfer
 
-**Note**: packet size should be set greater than 102400 in configuration file
-steps for windows user !
+**Note**: On android files will be saved in a folder named FastFileTransfer in your file manager. Make sure to give the app storage permission
+
 
 ## Installation
 

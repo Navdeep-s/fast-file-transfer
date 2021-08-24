@@ -30,6 +30,8 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.w3c.dom.Text;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -210,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    ProgressBar inflateProgressBar(int index_y,int size){
+    ProgressBar inflateProgressBar(int index_y,int size,String name_of_the_file){
         LinearLayout place1=(LinearLayout) findViewById(R.id.main_container);
 
 
@@ -219,16 +221,25 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        LinearLayout container =(LinearLayout)place1.getChildAt(index_y-1);
+        LinearLayout main_container =((LinearLayout)place1.getChildAt(index_y-1));
+
+        LinearLayout container = (LinearLayout) main_container.getChildAt(1);
+        TextView nameText = (TextView)main_container.getChildAt(0);
+
+        if(nameText.getText().equals("")){
+            nameText.setText(name_of_the_file);
+        }
 
         container.setWeightSum(size);
 
 
-        getLayoutInflater().inflate(R.layout.progresbar,container);
+        View child = getLayoutInflater().inflate(R.layout.progresbar,container);
 //        Toast.makeText(this,place1.getChildCount()+"sa",Toast.LENGTH_SHORT).show();
-
+//        container.addView(child);
 
         ProgressBar pbar=(ProgressBar) container.getChildAt(container.getChildCount()-1);
+//        ProgressBar pbar = (ProgressBar) child;
+        Log.d("p_bar",pbar.toString());
 
         return pbar;
 
@@ -436,8 +447,9 @@ public class MainActivity extends AppCompatActivity {
         ProgressBar progressBar;
         int file_percentage;
         int file_counting;
+        String name_of_file;
 
-        Send_packet(Uri  uri_id, long starting_point , long file_size, int id,int no_of_sockets, int file_counti) {
+        Send_packet(Uri  uri_id, long starting_point , long file_size, int id,int no_of_sockets, int file_counti,String name_of_file) {
 
             this.data_id = id;
             this.sending_file_path = uri_id;
@@ -445,6 +457,7 @@ public class MainActivity extends AppCompatActivity {
             this.file_size = file_size;
             this.no_of_sockets = no_of_sockets;
             this.file_counting  = file_counti;
+            this.name_of_file = name_of_file;
 
 
         }
@@ -488,7 +501,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
 
-                        progressBar = inflateProgressBar(file_counting,no_of_sockets);
+                        progressBar = inflateProgressBar(file_counting,no_of_sockets,name_of_file);
                         Log.d("sender",no_of_sockets+" "+file_counting);
 
                     }
@@ -693,7 +706,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
 
-                        progressBar = inflateProgressBar(file_counting,no_of_sockets);
+                        progressBar = inflateProgressBar(file_counting,no_of_sockets,name_of_file);
                         Log.d("sender",no_of_sockets+" "+file_count);
 
 
@@ -741,6 +754,10 @@ public class MainActivity extends AppCompatActivity {
                             msgLog = "";
 
                             progressBar.setProgress(file_percentage);
+                            //LinearLayout container = (LinearLayout) progressBar.getParent();
+//                            LinearLayout maine_container = (LinearLayout) container.getParent();
+//                            TextView t_View = (TextView)maine_container.getChildAt(0);
+//                            t_View.setText("hi"+file_percentage);
 
                         }
 
@@ -902,7 +919,7 @@ public class MainActivity extends AppCompatActivity {
                             //todo
                             long starting_point  = k*data_length;
 
-                            Send_packet packet_sender = new Send_packet(uri_id, starting_point,data_length,id,number_of_sockets,file_count);
+                            Send_packet packet_sender = new Send_packet(uri_id, starting_point,data_length,id,number_of_sockets,file_count,name);
                             packet_sender.start();
 
                             //start a send_packet socket thread
@@ -912,7 +929,7 @@ public class MainActivity extends AppCompatActivity {
 
 
                         long remaining_data = file_size - data_length*(number_of_sockets-1);
-                        Send_packet packet_sender = new Send_packet(uri_id, data_length*(number_of_sockets-1),remaining_data,id,number_of_sockets,file_count);
+                        Send_packet packet_sender = new Send_packet(uri_id, data_length*(number_of_sockets-1),remaining_data,id,number_of_sockets,file_count,name);
                         packet_sender.start();
 
 

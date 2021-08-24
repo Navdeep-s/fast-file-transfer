@@ -61,8 +61,13 @@
             android:layout_margin="5dp"
             android:layout_gravity="center_horizontal"
             android:gravity="center_horizontal"
-            android:id="@+id/main_container"/>
+            android:id="@+id/main_container">
 
+<!--            <include layout="@layout/container"/>-->
+<!--            <include layout="@layout/container"/>-->
+<!--            <include layout="@layout/container"/>-->
+<!--            <include layout="@layout/container"/>-->
+        </LinearLayout>
     </ScrollView>
 
 </LinearLayout>
